@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block title %}System UI Slides Showcase · ISAC Portal{% endblock %}
+{% block page_title %}System UI Slides Showcase{% endblock %}
+
+{% block content %}
+<div class="showcase-container">
+  <!-- Top Navigation & Controls Bar -->
+  <div class="showcase-heading-row">
+    <div class="showcase-heading-copy">
+      <h2>Interactive System Screens Showcase</h2>
+      <p>
+        Experience all 5 portal modules with smooth JavaScript slide transitions.
+      </p>
+    </div>
+    <div class="showcase-actions">
+      <button type="button" class="btn" id="autoPlayToggle" style="background:var(--surface); border:1px solid var(--border);">
+        <i data-lucide="play"></i> Auto-Play Slides
+      </button>
+      <a href="{% url 'dashboard' %}" class="btn primary">
+        <i data-lucide="home"></i> Return to Portal
+      </a>
+    </div>
+  </div>
+
+  <!-- Screen Selector Tabs (Matching Picture 2 Views) -->
+  <div class="showcase-slide-tabs" aria-label="Showcase slides">
+    <button class="dash-pill-btn slide-tab-nav active" onclick="goToSlide(0)">
+      <i data-lucide="user"></i> 1. Student Dashboard
+    </button>
+    <button class="dash-pill-btn slide-tab-nav" onclick="goToSlide(1)">
+      <i data-lucide="scan-line"></i> 2. QR Scanner
+    </button>
+    <button class="dash-pill-btn slide-tab-nav" onclick="goToSlide(2)">
+      <i data-lucide="calendar"></i> 3. Event Calendar
+    </button>
+    <button class="dash-pill-btn slide-tab-nav" onclick="goToSlide(3)">
+      <i data-lucide="badge-check"></i> 4. Digital Clearance
+    </button>
+    <button class="dash-pill-btn slide-tab-nav" onclick="goToSlide(4)">
+      <i data-lucide="shield"></i> 5. CSBO Officer Dashboard
+    </button>
+  </div>
+
+  <!-- Main Slide Carousel Track -->
+  <div class="showcase-slider-wrapper">
+    <div class="slides-track" id="slidesTrack">
+      <!-- SLIDE 1: Student Dashboard -->
+      <div class="slide-item">
+        <div class="slide-caption-bar">
+          <div>
+            <h3>Slide 1: Student Dashboard</h3>
+            <span style="font-size:12px; color:#a7cfba;">Activity Completer, Clearance Status & Student Profile</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{% url 'dashboard' %}" class="btn" style="background:#14291f; border-color:#284434; color:#ffffff; font-size:12px; padding:6px 12px;">
+              Launch Live Module &rarr;
+            </a>
+            <span class="slide-num-tag">1 / 5</span>
+          </div>
+        </div>
+
+          <div class="showcase-preview-surface" style="background:#f4f7f5; border-radius:14px; padding:20px; color:#1f2937;">
+          <!-- Mock Header Tabs -->
+          <div class="dashboard-tabs-bar" style="margin-bottom:14px;">
+            <span class="dash-pill-btn active"><i data-lucide="layout-dashboard"></i> Dashboard</span>
+            <span class="dash-pill-btn"><i data-lucide="badge-check"></i> Clearance</span>
+            <span class="dash-pill-btn"><i data-lucide="book-open"></i> Instructor</span>
+          </div>
+
+          <!-- Mock Student Profile Card -->
+          <div class="student-profile-hero" style="background:#ffffff; margin-bottom:14px;">
+            <div class="profile-main-info">
+              <div class="student-avatar">PI</div>
+              <div class="student-meta">
+                <h2>Paulinia Indra</h2>
+                <p>Undergraduate 3rd Year · BS Information Systems</p>
+                <span class="student-id-badge">Student ID: 2026-0001</span>
+              </div>
+            </div>
+            <a href="{% url 'digital_id' %}" class="btn primary pill">
+              <i data-lucide="id-card"></i> Student ID
+            </a>
+          </div>
+
+          <!-- Mock 2-Col Grid -->
+          <div class="dashboard-grid-2" style="margin-bottom:0;">
+            <div class="ui-card" style="background:#ffffff;">
+              <div class="ui-card-head">
+                <h3>Activity Completer</h3>
+                <span class="status-pill completed">67%</span>
+              </div>
+              <div class="activity-completer-content">
+                <div class="activity-metric-row"><span>Courses</span><b>10 Courses</b></div>
+                <div class="activity-metric-row"><span>Events Attending</span><b>67%</b></div>
+                <div class="progress-track"><div class="progress-fill" style="width:67%;"></div></div>
+                <div class="activity-metric-row"><span>Progress</span><b>67%</b></div>
+              </div>
+            </div>
+
+            <div class="ui-card" style="background:#ffffff;">
+              <div class="ui-card-head">
+                <h3>Clearance Status</h3>
+                <span style="font-size:12px; color:var(--emerald-600); font-weight:700;">Verified</span>
+              </div>
+              <ul class="checklist-container">
+                <li class="checklist-item"><span class="check-icon-box"><i data-lucide="check"></i></span> Profile Info</li>
+                <li class="checklist-item"><span class="check-icon-box"><i data-lucide="check"></i></span> Department clearance</li>
+                <li class="checklist-item"><span class="check-icon-box"><i data-lucide="check"></i></span> Requirements</li>
+                <li class="checklist-item"><span class="check-icon-box"><i data-lucide="check"></i></span> Event complete</li>
+                <li class="checklist-item"><span class="check-icon-box"><i data-lucide="check"></i></span> Upcoming deadlines</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: QR Scanner -->
+      <div class="slide-item">
+        <div class="slide-caption-bar">
+          <div>
+            <h3>Slide 2: Mobile QR Scanner</h3>
+            <span style="font-size:12px; color:#a7cfba;">Framed Smartphone Mockup with Real-time Laser Feed</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{% url 'scanner' %}" class="btn" style="background:#14291f; border-color:#284434; color:#ffffff; font-size:12px; padding:6px 12px;">
+              Launch Live Module &rarr;
+            </a>
+            <span class="slide-num-tag">2 / 5</span>
+          </div>
+        </div>
+
+        <div class="showcase-phone-stage" style="display:flex; justify-content:center; padding:10px 0;">
+          <div class="phone-mockup-frame" style="width:340px;">
+            <div class="phone-notch-bar">
+              <span>9:41</span>
+              <div class="phone-speaker-camera"></div>
+              <span>100%</span>
+            </div>
+            <div class="phone-inner-screen" style="min-height:460px;">
+              <div class="phone-nav-bar">
+                <i data-lucide="chevron-left"></i>
+                <span style="font-weight:700; font-size:13px;">QR Scanner</span>
+                <i data-lucide="flash"></i>
+              </div>
+              <div class="qr-viewfinder-box" style="width:200px; height:200px; margin:20px 0;">
+                <span class="qr-corner-bracket tl"></span>
+                <span class="qr-corner-bracket tr"></span>
+                <span class="qr-corner-bracket bl"></span>
+                <span class="qr-corner-bracket br"></span>
+                <div class="qr-scan-laser"></div>
+                <div class="qr-center-code-mock" style="width:140px; height:140px;">
+                  <i data-lucide="qr-code" style="width:100px; height:100px; color:#0f3829;"></i>
+                </div>
+              </div>
+              <span class="scanning-pulse-text">Scanning...</span>
+              <a href="{% url 'scanner' %}" class="btn-scan-action" style="text-align:center; display:flex; align-items:center; justify-content:center;">
+                Scan Code
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Event Calendar -->
+      <div class="slide-item">
+        <div class="slide-caption-bar">
+          <div>
+            <h3>Slide 3: Event Calendar</h3>
+            <span style="font-size:12px; color:#a7cfba;">Dark Theme Calendar Grid & Team Activity Schedule</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{% url 'event_calendar' %}" class="btn" style="background:#14291f; border-color:#284434; color:#ffffff; font-size:12px; padding:6px 12px;">
+              Launch Live Module &rarr;
+            </a>
+            <span class="slide-num-tag">3 / 5</span>
+          </div>
+        </div>
+
+        <div class="calendar-dark-container showcase-calendar-preview">
+          <div class="calendar-header-bar">
+            <div class="calendar-month-selector showcase-calendar-month">
+              <button type="button" class="cal-nav-btn" aria-label="Previous month"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+              <h2>April 2026</h2>
+              <button type="button" class="cal-nav-btn" aria-label="Next month"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+            </div>
+            <div class="calendar-view-pills">
+              <span class="cal-view-pill active">Month</span>
+              <span class="cal-view-pill">Week</span>
+              <span class="cal-view-pill">Day</span>
+            </div>
+          </div>
+          <div class="calendar-layout-with-sidebar">
+            <div class="calendar-days-grid showcase-calendar-grid">
+              <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div><div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+              <div class="cal-date-cell outside-month"><span class="cal-date-number">29</span></div><div class="cal-date-cell outside-month"><span class="cal-date-number">30</span></div><div class="cal-date-cell outside-month"><span class="cal-date-number">31</span></div>
+              <div class="cal-date-cell"><span class="cal-date-number">1</span></div><div class="cal-date-cell"><span class="cal-date-number">2</span></div><div class="cal-date-cell"><span class="cal-date-number">3</span><span class="cal-event-pill">Tech Summit</span></div><div class="cal-date-cell"><span class="cal-date-number">4</span></div>
+              <div class="cal-date-cell"><span class="cal-date-number">5</span></div><div class="cal-date-cell"><span class="cal-date-number">6</span></div><div class="cal-date-cell"><span class="cal-date-number">7</span><span class="cal-event-pill">Seminar</span></div><div class="cal-date-cell"><span class="cal-date-number">8</span></div><div class="cal-date-cell"><span class="cal-date-number">9</span></div><div class="cal-date-cell"><span class="cal-date-number">10</span></div><div class="cal-date-cell"><span class="cal-date-number">11</span><span class="cal-event-pill">Clean-up</span></div>
+              <div class="cal-date-cell"><span class="cal-date-number">12</span></div><div class="cal-date-cell"><span class="cal-date-number">13</span></div><div class="cal-date-cell"><span class="cal-date-number">14</span></div><div class="cal-date-cell"><span class="cal-date-number">15</span></div><div class="cal-date-cell today"><span class="cal-date-number">16</span><span class="cal-event-pill">Assembly</span></div><div class="cal-date-cell"><span class="cal-date-number">17</span></div><div class="cal-date-cell"><span class="cal-date-number">18</span></div>
+              <div class="cal-date-cell"><span class="cal-date-number">19</span></div><div class="cal-date-cell"><span class="cal-date-number">20</span></div><div class="cal-date-cell"><span class="cal-date-number">21</span></div><div class="cal-date-cell"><span class="cal-date-number">22</span></div><div class="cal-date-cell"><span class="cal-date-number">23</span></div><div class="cal-date-cell"><span class="cal-date-number">24</span></div><div class="cal-date-cell"><span class="cal-date-number">25</span></div>
+              <div class="cal-date-cell"><span class="cal-date-number">26</span></div><div class="cal-date-cell"><span class="cal-date-number">27</span></div><div class="cal-date-cell"><span class="cal-date-number">28</span></div><div class="cal-date-cell"><span class="cal-date-number">29</span></div><div class="cal-date-cell"><span class="cal-date-number">30</span></div><div class="cal-date-cell outside-month"><span class="cal-date-number">1</span></div><div class="cal-date-cell outside-month"><span class="cal-date-number">2</span></div>
+            </div>
+            <div class="calendar-sidebar-events showcase-calendar-events">
+              <div class="showcase-calendar-events-head"><strong>Upcoming events</strong><span>April 2026</span></div>
+              <div class="schedule-item">
+                <span class="showcase-event-time">APR 03 · 9:00 AM</span>
+                <h4>Technology Summit</h4>
+                <p>Associate Info · Audio Visual Hall</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Digital Clearance Dashboard -->
+      <div class="slide-item">
+        <div class="slide-caption-bar">
+          <div>
+            <h3>Slide 4: Digital Clearance Dashboard</h3>
+            <span style="font-size:12px; color:#a7cfba;">Institutional Requirements, Verification Checklist & Details</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{% url 'clearance' %}" class="btn" style="background:#14291f; border-color:#284434; color:#ffffff; font-size:12px; padding:6px 12px;">
+              Launch Live Module &rarr;
+            </a>
+            <span class="slide-num-tag">4 / 5</span>
+          </div>
+        </div>
+
+        <div class="clearance-table-card" style="background:#ffffff; color:#1f2937;">
+          <div class="clearance-head-row">
+            <h2 style="font-size:18px;">Clearance Requirements</h2>
+            <span class="btn" style="font-size:12px; padding:4px 10px; background:#f3f4f6;">View Details</span>
+          </div>
+          <div class="showcase-clearance-table-wrap">
+          <table class="clearance-checklist-table">
+            <thead>
+              <tr><th>Requirement</th><th>Status</th><th>Verification</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex; gap:8px; align-items:center;"><span class="check-icon-box"><i data-lucide="check"></i></span><b>Library</b></div></td>
+                <td><span class="status-pill completed">COMPLETED</span></td>
+                <td>Verified by Circulation</td>
+              </tr>
+              <tr>
+                <td><div style="display:flex; gap:8px; align-items:center;"><span class="check-icon-box"><i data-lucide="check"></i></span><b>Fees</b></div></td>
+                <td><span class="status-pill submitted">SUBMITTED</span></td>
+                <td>Treasury Audit Pending</td>
+              </tr>
+              <tr>
+                <td><div style="display:flex; gap:8px; align-items:center;"><span class="check-icon-box"><i data-lucide="check"></i></span><b>Sports</b></div></td>
+                <td><span class="status-pill approved">APPROVED</span></td>
+                <td>Equipment Returned</td>
+              </tr>
+              <tr>
+                <td><div style="display:flex; gap:8px; align-items:center;"><span class="check-icon-box"><i data-lucide="check"></i></span><b>Course Clear</b></div></td>
+                <td><span class="status-pill completed">COMPLETED</span></td>
+                <td>Department Dean Sign-off</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: CSBO Officer Dashboard -->
+      <div class="slide-item">
+        <div class="slide-caption-bar">
+          <div>
+            <h3>Slide 5: CSBO Officer Dashboard</h3>
+            <span style="font-size:12px; color:#a7cfba;">Live scan activity, participation trends &amp; clearance status</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{% url 'officer_dashboard' %}" class="btn" style="background:#14291f; border-color:#284434; color:#ffffff; font-size:12px; padding:6px 12px;">
+              Launch Live Module &rarr;
+            </a>
+            <span class="slide-num-tag">5 / 5</span>
+          </div>
+        </div>
+
+        <div class="showcase-officer-preview">
+          <div class="showcase-officer-metrics">
+            <article><span>Total events</span><strong>22</strong><i data-lucide="calendar-days" aria-hidden="true"></i></article>
+            <article><span>Today's attendance</span><strong class="positive">124</strong><i data-lucide="user-check" aria-hidden="true"></i></article>
+            <article><span>Pending clearances</span><strong class="warning">19</strong><i data-lucide="clipboard-list" aria-hidden="true"></i></article>
+            <article><span>Unpaid fines</span><strong class="danger">PHP 2,355</strong><i data-lucide="wallet-cards" aria-hidden="true"></i></article>
+          </div>
+
+          <div class="showcase-officer-live-grid">
+            <section class="showcase-officer-card">
+              <div class="showcase-officer-card-heading"><div><small>Attendance activity</small><h4>Recent scans</h4></div><span class="showcase-live-badge"><i></i>Latest records</span></div>
+              <div class="showcase-scan-list">
+                <div><time>2:31 PM</time><strong>Maria Santos</strong><span>Successful</span></div>
+                <div><time>2:30 PM</time><strong>Juan Dela Cruz</strong><span>Successful</span></div>
+                <div><time>2:29 PM</time><strong>John Smith</strong><span>Successful</span></div>
+              </div>
+            </section>
+            <section class="showcase-officer-card showcase-officer-counter">
+              <small>Live counter</small>
+              <div class="showcase-counter-ring"><div><span>Successful scans</span><strong>124</strong><small>today</small></div></div>
+              <strong class="showcase-counter-caption">Today's attendance</strong>
+            </section>
+          </div>
+
+          <div class="showcase-officer-bottom-grid">
+            <section class="showcase-officer-card">
+              <div class="showcase-officer-card-heading"><div><small>Participation</small><h4>Attendance by event</h4></div><span class="showcase-mini-link">View all &rarr;</span></div>
+              <div class="showcase-mini-bars" aria-label="Attendance by weekday bar chart">
+                <div><i style="height:54%"></i><span>Mon</span></div><div><i style="height:76%"></i><span>Tue</span></div><div><i style="height:42%"></i><span>Wed</span></div><div><i style="height:92%"></i><span>Thu</span></div><div><i style="height:68%"></i><span>Fri</span></div>
+              </div>
+            </section>
+            <section class="showcase-officer-card showcase-clearance-summary">
+              <div class="showcase-officer-card-heading"><div><small>Student services</small><h4>Clearance status</h4></div><i data-lucide="badge-check" aria-hidden="true"></i></div>
+              <div class="showcase-clearance-stat"><span><i class="cleared"></i> Cleared</span><strong>84%</strong></div>
+              <div class="showcase-clearance-track"><i></i></div>
+              <div class="showcase-clearance-stat"><span><i class="awaiting"></i> Awaiting review</span><strong>16%</strong></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Slider Navigation Controls -->
+    <div class="slider-controls-row">
+      <div class="slider-nav-arrows">
+        <button class="slider-arrow-btn" id="prevSlideBtn" title="Previous Slide (or Left Arrow)">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="slider-arrow-btn" id="nextSlideBtn" title="Next Slide (or Right Arrow)">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Dot Indicators -->
+      <div class="slider-dots" id="sliderDots"></div>
+
+      <span style="font-size:12px; color:#8bbfa6;">Use &larr; &rarr; Arrow Keys to Navigate</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

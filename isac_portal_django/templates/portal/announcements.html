@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Public Announcements - ISAC Portal{% endblock %}
+{% block page_title %}Public Announcements{% endblock %}
+
+{% block content %}
+<section class="module-page public-news-page">
+  <div class="module-heading"><div><span class="module-eyebrow">DMMMSU-NLUC - CSBO</span><h2>Campus updates</h2><p>News and notices from your student community.</p></div><span class="module-heading-chip"><i data-lucide="radio" aria-hidden="true"></i> Official updates</span></div>
+  <form method="get" class="module-filter-bar announcement-filter-bar public-announcement-filter-bar">
+    <label class="module-search"><span>Search public announcements</span><i data-lucide="search" aria-hidden="true"></i><input type="search" name="q" value="{{ q }}" placeholder="Search title, message, or category"></label>
+    <label><span>Category</span><select name="category"><option value="">All categories</option>{% for value,label in categories %}<option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <button class="btn primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Search</button>
+    {% if q or category %}<a class="btn announcement-filter-reset" href="{% url 'announcements' %}"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Reset</a>{% endif %}
+  </form>
+  <div class="public-news-feed">
+    {% for a in items %}
+    <article class="public-news-card {{ a.category }}">
+      <div class="public-news-icon {{ a.category }}"><i data-lucide="{% if a.category == 'urgent' %}siren{% elif a.category == 'event' %}calendar-days{% elif a.category == 'clearance' %}badge-check{% else %}megaphone{% endif %}" aria-hidden="true"></i></div>
+      <div class="public-news-content"><div class="public-news-meta"><span class="announcement-category {{ a.category }}">{{ a.category|title }}</span><time datetime="{{ a.published_at|date:'c' }}"><i data-lucide="clock-3" aria-hidden="true"></i>{{ a.published_at|date:"M d, Y, g:i A" }}</time></div><h3>{{ a.title }}</h3><p>{{ a.body|truncatechars:320 }}</p></div>
+    </article>
+    {% empty %}<div class="module-empty"><span><i data-lucide="{% if q or category %}search-x{% else %}bell-off{% endif %}" aria-hidden="true"></i></span><h3>{% if q or category %}No matching announcements{% else %}No announcements right now{% endif %}</h3><p>{% if q or category %}Try another search or clear the filters.{% else %}New campus updates will appear here.{% endif %}</p>{% if q or category %}<a class="btn" href="{% url 'announcements' %}">Clear filters</a>{% endif %}</div>{% endfor %}
+  </div>
+</section>
+{% endblock %}

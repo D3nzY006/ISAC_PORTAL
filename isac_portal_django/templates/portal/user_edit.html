@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ target.username }} · ISAC Portal{% endblock %}
+{% block page_title %}Edit User{% endblock %}
+
+{% block content %}
+<section class="user-edit-page">
+  <a class="users-back-link" href="{% url 'user_manage' %}"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to users</a>
+  <div class="user-edit-card">
+    <div class="user-edit-heading"><span><i data-lucide="user-round-pen" aria-hidden="true"></i></span><div><h2>Edit account</h2><p>Update profile and sign-in access for @{{ target.username }}.</p></div></div>
+    <form method="post" class="user-edit-form">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="user-edit-field {% if field.name == 'is_active' %}checkbox-field{% endif %}">
+        {% if field.name == "is_active" %}
+          {{ field }}<label for="{{ field.id_for_label }}">{{ field.label }}<small>Inactive users cannot sign in to the portal.</small></label>
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+          {% if field.help_text %}<small class="user-edit-help">{{ field.help_text }}</small>{% endif %}
+        {% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </div>
+      {% endfor %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="user-edit-actions"><a class="btn" href="{% url 'user_manage' %}">Cancel</a><button class="btn primary" type="submit"><i data-lucide="save" aria-hidden="true"></i> Save changes</button></div>
+    </form>
+  </div>
+</section>
+{% endblock %}

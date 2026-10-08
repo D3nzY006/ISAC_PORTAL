@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Officer Dashboard - ISAC Portal{% endblock %}
+{% block page_title %}CSBO Officer Dashboard{% endblock %}
+
+{% block content %}
+<div class="officer-dashboard-shell">
+  <nav class="officer-nav-pills" aria-label="Officer dashboard sections">
+    <a href="{% url 'officer_dashboard' %}" class="officer-nav-pill active" aria-current="page">Overview</a>
+    <a href="{% url 'events_manage' %}" class="officer-nav-pill">Event Management</a>
+    <a href="{% url 'attendance_records' %}" class="officer-nav-pill">Attendance Monitoring</a>
+    <a href="{% url 'clearance_manage' %}" class="officer-nav-pill">Clearance Desk</a>
+    <a href="{% url 'fines' %}" class="officer-nav-pill">Fines Ledger</a>
+    <a href="{% url 'reports' %}" class="officer-nav-pill">Reports &amp; Analytics</a>
+  </nav>
+
+  <section class="officer-metrics" aria-label="Campus overview">
+    <article class="officer-metric"><span>Total events</span><strong>{{ total_events }}</strong><i data-lucide="calendar-days" aria-hidden="true"></i></article>
+    <article class="officer-metric"><span>Today's attendance</span><strong class="metric-green">{{ today_attendance }}</strong><i data-lucide="user-check" aria-hidden="true"></i></article>
+    <article class="officer-metric"><span>Pending clearances</span><strong class="metric-amber">{{ pending }}</strong><i data-lucide="clipboard-list" aria-hidden="true"></i></article>
+    <article class="officer-metric"><span>Unpaid fines</span><strong class="metric-red">PHP {{ unpaid|floatformat:2 }}</strong><i data-lucide="wallet-cards" aria-hidden="true"></i></article>
+  </section>
+
+  <section class="officer-live-grid" aria-label="Recent attendance activity">
+    <article class="officer-panel-card officer-feed-card">
+      <div class="officer-panel-heading">
+        <div><p class="officer-chart-eyebrow">Attendance activity</p><h2>Recent Scans</h2></div>
+        <span class="officer-live-chip"><span></span>Latest records</span>
+      </div>
+      <div class="officer-feed-table-wrap">
+        <table class="officer-feed-table">
+          <thead><tr><th scope="col">Time</th><th scope="col">Student</th><th scope="col">Student ID</th><th scope="col">Event</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            {% for scan in latest_scans %}
+              <tr>
+                <td>{{ scan.scanned_at|date:"g:i A" }}</td>
+                <td>{{ scan.student.full_name }}</td>
+                <td>{{ scan.student.student_no|default:"—" }}</td>
+                <td>{{ scan.event.title }}</td>
+                <td><span class="officer-feed-status {{ scan.status }}">{{ scan.get_status_display }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="officer-feed-empty">No attendance scans have been recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <a class="officer-feed-link" href="{% url 'attendance_records' %}">View attendance records <span aria-hidden="true">&rarr;</span></a>
+    </article>
+
+    <article class="officer-panel-card officer-counter-card" aria-label="Today's successful attendance scans">
+      <p class="officer-chart-eyebrow">Live counter</p>
+      <div class="officer-counter-ring"><div><span>Successful scans</span><strong>{{ today_attendance }}</strong><small>today</small></div></div>
+      <p class="officer-counter-caption">Today's attendance</p>
+      <a class="report-export-btn report-export-primary" href="{% url 'scanner' %}"><i data-lucide="scan-line" aria-hidden="true"></i>Open scanner</a>
+    </article>
+  </section>
+
+  <section class="officer-analytics-section" aria-labelledby="officer-analytics-title">
+    <div class="officer-section-heading">
+      <div><p class="officer-chart-eyebrow">Participation insights</p><h2 id="officer-analytics-title">Attendance &amp; Clearance Analytics</h2></div>
+      <a class="officer-view-all" href="{% url 'reports' %}">Reports &amp; exports <span aria-hidden="true">&rarr;</span></a>
+    </div>
+
+    <div class="officer-analytics-grid">
+      <article class="officer-panel-card officer-analytics-card">
+        <div class="officer-panel-heading"><div><h3>Participation by Year Level</h3><p class="officer-chart-description">Unique students with recorded attendance</p></div><span class="officer-chart-icon" aria-hidden="true"><i data-lucide="chart-pie"></i></span></div>
+        <div class="officer-analytics-chart officer-donut-chart"><canvas id="yearLevelChart" role="img" aria-label="Doughnut chart of participating students by year level"></canvas><p class="officer-chart-empty" id="yearLevelEmpty" hidden>No attendance data is available yet.</p></div>
+      </article>
+
+      <article class="officer-panel-card officer-analytics-card">
+        <div class="officer-panel-heading"><div><h3>Peak Scanning Hours</h3><p class="officer-chart-description">Scan volume throughout one event</p></div><span class="officer-chart-icon" aria-hidden="true"><i data-lucide="chart-no-axes-column-increasing"></i></span></div>
+        <form class="officer-event-filter" method="get" action="{% url 'officer_dashboard' %}">
+          <label for="analyticsEvent">Event</label>
+          <select id="analyticsEvent" name="analytics_event" onchange="this.form.submit()">
+            {% for event in attended_events %}<option value="{{ event.id }}" {% if selected_event.id == event.id %}selected{% endif %}>{{ event.title }}</option>{% empty %}<option value="">No events with attendance</option>{% endfor %}
+          </select>
+        </form>
+        <div class="officer-analytics-chart"><canvas id="peakHourChart" role="img" aria-label="Line chart of attendance scan volume by hour for the selected event"></canvas><p class="officer-chart-empty" id="peakHourEmpty" hidden>No scan data is available for this event.</p></div>
+      </article>
+
+      <article class="officer-panel-card officer-analytics-card">
+        <div class="officer-panel-heading"><div><h3>Attendance Volume by Event</h3><p class="officer-chart-description">Events with the highest student participation</p></div><span class="officer-chart-icon" aria-hidden="true"><i data-lucide="chart-column-increasing"></i></span></div>
+        <div class="officer-analytics-chart"><canvas id="eventChart" role="img" aria-label="Bar chart of attendance volume by event"></canvas><p class="officer-chart-empty" id="eventChartEmpty" hidden>No event attendance is available yet.</p></div>
+      </article>
+
+      <article class="officer-panel-card officer-analytics-card">
+        <div class="officer-panel-heading"><div><h3>Clearance &amp; Fine Status</h3><p class="officer-chart-description">Record counts grouped by calendar half-year</p></div><span class="officer-chart-icon" aria-hidden="true"><i data-lucide="chart-no-axes-column-increasing"></i></span></div>
+        <div class="officer-analytics-chart officer-status-chart"><canvas id="semesterStatusChart" role="img" aria-label="Stacked bar chart comparing clearance and fine status counts by half-year"></canvas><p class="officer-chart-empty" id="semesterStatusEmpty" hidden>No clearance or fine records are available yet.</p></div>
+        <p class="officer-chart-footnote">Periods use record dates (Jan–Jun and Jul–Dec); the portal does not store a separate semester field.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="officer-export-heading"><h3>Report exports</h3><a href="{% url 'reports' %}">All reports <span aria-hidden="true">&rarr;</span></a></div>
+  <div class="officer-export-grid">
+    <a href="{% url 'report_excel' %}" class="report-export-btn"><i data-lucide="file-spreadsheet" aria-hidden="true"></i>Excel report</a>
+    <a href="{% url 'report_pdf' %}" class="report-export-btn"><i data-lucide="file-text" aria-hidden="true"></i>PDF report</a>
+    <a href="{% url 'reports' %}" class="report-export-btn"><i data-lucide="list-filter" aria-hidden="true"></i>Filtered export</a>
+    <a href="{% url 'scanner' %}" class="report-export-btn"><i data-lucide="scan-line" aria-hidden="true"></i>Open scanner</a>
+  </div>
+</div>
+{{ chart_data|json_script:"officer-chart-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartData = JSON.parse(document.getElementById('officer-chart-data').textContent);
+  const chartInstances = [];
+  const chartColors = ['#25885a', '#56b98a', '#8ed7b2', '#e1a83d', '#7b8da6'];
+
+  function themeColors() {
+    const styles = getComputedStyle(document.documentElement);
+    return {
+      text: styles.getPropertyValue('--gray-500').trim() || '#6b7280',
+      grid: styles.getPropertyValue('--border-subtle').trim() || '#ebf1ee'
+    };
+  }
+
+  function showEmpty(canvasId, emptyId) {
+    const canvas = document.getElementById(canvasId);
+    const empty = document.getElementById(emptyId);
+    if (canvas) canvas.hidden = true;
+    if (empty) empty.hidden = false;
+  }
+
+  function chartBase() {
+    const colors = themeColors();
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 450 },
+      plugins: {
+        legend: { labels: { color: colors.text, usePointStyle: true, boxWidth: 9, padding: 16, font: { family: 'Inter, sans-serif', size: 11 } } },
+        tooltip: { displayColors: true }
+      }
+    };
+  }
+
+  function makeChart(canvasId, emptyId, rows, config) {
+    if (!rows || !rows.length || rows.every(row => !row.total)) {
+      showEmpty(canvasId, emptyId);
+      return null;
+    }
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    const chart = new Chart(canvas, { ...config, options: { ...chartBase(), ...config.options } });
+    chartInstances.push(chart);
+    return chart;
+  }
+
+  makeChart('yearLevelChart', 'yearLevelEmpty', chartData.yearLevels, {
+    type: 'doughnut',
+    data: { labels: chartData.yearLevels.map(row => row.label), datasets: [{ data: chartData.yearLevels.map(row => row.total), backgroundColor: chartColors, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--officer-panel-bg').trim(), borderWidth: 3, hoverOffset: 5 }] },
+    options: { cutout: '66%', plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: context => ` ${context.label}: ${context.parsed.toLocaleString()} students` } } } }
+  });
+
+  makeChart('peakHourChart', 'peakHourEmpty', chartData.peakHours, {
+    type: 'line',
+    data: { labels: chartData.peakHours.map(row => row.label), datasets: [{ label: 'Successful scans', data: chartData.peakHours.map(row => row.total), borderColor: chartColors[0], backgroundColor: 'rgba(37,136,90,.12)', fill: true, tension: .32, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }] },
+    options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: themeColors().text, autoSkip: true, maxTicksLimit: 8, maxRotation: 0 } }, y: { beginAtZero: true, ticks: { color: themeColors().text, precision: 0 }, grid: { color: themeColors().grid } } } }
+  });
+
+  makeChart('eventChart', 'eventChartEmpty', chartData.eventAttendance, {
+    type: 'bar',
+    data: { labels: chartData.eventAttendance.map(row => row.label), datasets: [{ label: 'Attendees', data: chartData.eventAttendance.map(row => row.total), backgroundColor: chartColors[0], borderRadius: 6, borderSkipped: false, maxBarThickness: 36 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { color: themeColors().text, precision: 0 }, grid: { color: themeColors().grid } }, y: { ticks: { color: themeColors().text, callback(value) { const label = this.getLabelForValue(value); return label.length > 28 ? `${label.slice(0, 25)}…` : label; } }, grid: { display: false } } } }
+  });
+
+  const semester = chartData.semesterStatus;
+  const statusValues = [...semester.clearanceCleared, ...semester.clearancePending, ...semester.finesPaid, ...semester.finesUnpaid, ...semester.finesWaived];
+  if (!statusValues.some(value => value > 0)) {
+    showEmpty('semesterStatusChart', 'semesterStatusEmpty');
+  } else {
+    const colors = themeColors();
+    const statusChart = new Chart(document.getElementById('semesterStatusChart'), {
+      type: 'bar',
+      data: { labels: semester.labels, datasets: [
+        { label: 'Clearance cleared', data: semester.clearanceCleared, backgroundColor: '#25885a', stack: 'clearance', borderRadius: 3 },
+        { label: 'Clearance pending', data: semester.clearancePending, backgroundColor: '#e1a83d', stack: 'clearance', borderRadius: 3 },
+        { label: 'Fines paid', data: semester.finesPaid, backgroundColor: '#56b98a', stack: 'fines', borderRadius: 3 },
+        { label: 'Fines unpaid', data: semester.finesUnpaid, backgroundColor: '#d66b68', stack: 'fines', borderRadius: 3 },
+        { label: 'Fines waived', data: semester.finesWaived, backgroundColor: '#7b8da6', stack: 'fines', borderRadius: 3 }
+      ] },
+      options: { ...chartBase(), plugins: { ...chartBase().plugins, legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true, boxWidth: 9, padding: 13, font: { family: 'Inter, sans-serif', size: 10 } } } }, scales: { x: { stacked: true, ticks: { color: colors.text, maxRotation: 0 }, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { color: colors.text, precision: 0 }, grid: { color: colors.grid } } } }
+    });
+    chartInstances.push(statusChart);
+  }
+
+  window.addEventListener('isac-theme-change', () => {
+    const colors = themeColors();
+    chartInstances.forEach(chart => {
+      if (chart.options.scales?.x?.ticks) chart.options.scales.x.ticks.color = colors.text;
+      if (chart.options.scales?.y?.ticks) chart.options.scales.y.ticks.color = colors.text;
+      if (chart.options.scales?.x?.grid?.color) chart.options.scales.x.grid.color = colors.grid;
+      if (chart.options.scales?.y?.grid?.color) chart.options.scales.y.grid.color = colors.grid;
+      if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = colors.text;
+      chart.update('none');
+    });
+  });
+</script>
+{% endblock %}

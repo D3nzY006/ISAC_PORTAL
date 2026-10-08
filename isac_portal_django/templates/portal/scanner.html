@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}QR Scanner · ISAC Portal{% endblock %}
+{% block page_title %}QR Attendance Scanner{% endblock %}
+
+{% block content %}
+<div class="scanner-page-layout">
+  <!-- Mobile Phone Mockup Frame (Faithfully Matching Picture 2) -->
+  <div class="phone-mockup-frame">
+    <!-- Top Speaker and Notch -->
+    <div class="phone-notch-bar">
+      <span>9:41</span>
+      <div class="phone-speaker-camera"></div>
+      <div style="display:flex; gap:4px; align-items:center;">
+        <i data-lucide="wifi" style="width:13px; height:13px;"></i>
+        <i data-lucide="battery" style="width:13px; height:13px;"></i>
+      </div>
+    </div>
+
+    <!-- Phone Inner Screen -->
+    <div class="phone-inner-screen">
+      <!-- Screen Navigation Bar -->
+      <div class="phone-nav-bar">
+        <a href="{% url 'officer_dashboard' %}" style="color:white; display:flex; align-items:center;">
+          <i data-lucide="chevron-left" style="width:20px; height:20px;"></i>
+        </a>
+        <span style="font-size:14px; font-weight:700; color:#ffffff;">Attendance Scanner</span>
+        <button type="button" id="flipCameraBtn" title="Camera options">
+          <i data-lucide="camera" style="width:16px; height:16px;"></i>
+        </button>
+      </div>
+
+      <!-- Event Selector -->
+      <div style="width:100%; margin-bottom:12px;">
+        <label style="display:block; font-size:11px; font-weight:600; color:#a7cfba; margin-bottom:4px;">Select Active Event</label>
+        <select id="eventSelect" class="form-input" style="background:#14291f; border-color:#244434; color:#ffffff; font-size:13px; height:38px;">
+          {% for e in events %}
+            <option value="{{ e.id }}" {% if e.status == 'ongoing' %}selected{% endif %}>{{ e.title }} ({{ e.status|title }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- QR Viewfinder Box with Brackets & Animated Laser -->
+      <div class="qr-viewfinder-box" id="viewfinderArea">
+        <span class="qr-corner-bracket tl"></span>
+        <span class="qr-corner-bracket tr"></span>
+        <span class="qr-corner-bracket bl"></span>
+        <span class="qr-corner-bracket br"></span>
+
+        <!-- Scan Laser Animation Line -->
+        <div class="qr-scan-laser" id="scanLaserLine"></div>
+
+        <!-- Camera Container or QR Graphic Placeholder -->
+        <div id="reader" style="width:100%; height:100%; border-radius:14px; overflow:hidden; display:none;"></div>
+        <div id="qrPlaceholder" class="qr-center-code-mock">
+          <!-- Static QR image preview -->
+          <svg viewBox="0 0 100 100" width="140" height="140" fill="#0d281e">
+            <rect x="10" y="10" width="25" height="25" rx="3" fill="#0d281e"/>
+            <rect x="15" y="15" width="15" height="15" fill="#ffffff"/>
+            <rect x="18" y="18" width="9" height="9" fill="#0d281e"/>
+            <rect x="65" y="10" width="25" height="25" rx="3" fill="#0d281e"/>
+            <rect x="70" y="15" width="15" height="15" fill="#ffffff"/>
+            <rect x="73" y="18" width="9" height="9" fill="#0d281e"/>
+            <rect x="10" y="65" width="25" height="25" rx="3" fill="#0d281e"/>
+            <rect x="15" y="70" width="15" height="15" fill="#ffffff"/>
+            <rect x="18" y="73" width="9" height="9" fill="#0d281e"/>
+            <rect x="45" y="15" width="10" height="10"/>
+            <rect x="40" y="30" width="15" height="8"/>
+            <rect x="45" y="45" width="12" height="12"/>
+            <rect x="25" y="45" width="10" height="10"/>
+            <rect x="65" y="45" width="20" height="10"/>
+            <rect x="45" y="65" width="15" height="15"/>
+            <rect x="65" y="65" width="10" height="20"/>
+            <rect x="80" y="80" width="10" height="10"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Scanning Status Text -->
+      <span class="scanning-pulse-text" id="scanStatusText">Scanning...</span>
+
+      <!-- Scan Code Action Button (Matching Picture 2) -->
+      <button type="button" class="btn-scan-action" id="startScanBtn">
+        Scan Code
+      </button>
+
+      <!-- Manual Student ID Quick Input -->
+      <div style="width:100%; margin-top:20px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);">
+        <span style="font-size:11px; color:#8bbfa6; display:block; margin-bottom:6px;">Manual Student ID / QR Token fallback:</span>
+        <div style="display:flex; gap:6px;">
+          <input id="studentIdInput" type="text" class="form-input" placeholder="e.g. 2026-0001" style="background:#14291f; border-color:#244434; color:#ffffff; font-size:12px; height:36px;">
+          <button type="button" id="manualRecordBtn" class="btn primary" style="padding:6px 14px; font-size:12px; height:36px;">Submit</button>
+        </div>
+      </div>
+
+      <!-- Result Banner -->
+      <div id="scanResultBox" style="width:100%; margin-top:14px; display:none; padding:10px 14px; border-radius:8px; font-size:12px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- Right Side: Live Activity Feed / Recent Scans -->
+  <div class="scanner-stream-panel">
+    <div class="ui-card">
+      <div class="ui-card-head">
+        <h3>Live Scan Stream</h3>
+        <span class="pill-tag" style="background:#dcfce7; color:#166534; border:none;">Real-time</span>
+      </div>
+      <p style="font-size:13px; color:var(--gray-500); margin-bottom:16px;">
+        Point the camera at any student's digital ID card or test with registered student tokens below.
+      </p>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:12px; font-weight:700; color:var(--gray-700); margin-bottom:6px; display:block;">Quick-Test Demo Students:</label>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="btn" style="padding:4px 10px; font-size:11px; background:var(--surface-muted);" onclick="testScan('2026-0001')">2026-0001 (Paulinia)</button>
+          <button type="button" class="btn" style="padding:4px 10px; font-size:11px; background:var(--surface-muted);" onclick="testScan('2026-0002')">2026-0002 (Mark)</button>
+          <button type="button" class="btn" style="padding:4px 10px; font-size:11px; background:var(--surface-muted);" onclick="testScan('2026-0003')">2026-0003 (Joshua)</button>
+        </div>
+      </div>
+
+      <div id="scanLogList" style="display:grid; gap:8px; max-height:350px; overflow-y:auto;">
+        <div style="padding:10px 12px; background:var(--surface-muted); border-radius:8px; font-size:12.5px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <b>System Ready</b>
+            <small style="display:block; color:var(--gray-500);">Awaiting next scan event</small>
+          </div>
+          <span style="font-size:11px; color:var(--gray-400);">Now</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+  let scanner = null;
+  const resultBox = document.getElementById("scanResultBox");
+  const logList = document.getElementById("scanLogList");
+  const statusText = document.getElementById("scanStatusText");
+  const readerDiv = document.getElementById("reader");
+  const qrPlaceholder = document.getElementById("qrPlaceholder");
+
+  async function sendScan(payload) {
+    payload.event_id = document.getElementById("eventSelect").value;
+    try {
+      const res = await fetch("{% url 'scan_attendance' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      resultBox.style.display = "block";
+
+      if (data.ok) {
+        resultBox.style.background = "#dcfce7";
+        resultBox.style.color = "#166534";
+        resultBox.innerHTML = `<strong>✓ Recorded!</strong> ${data.student} (${data.college || ''} Yr ${data.year || ''})`;
+        statusText.innerText = "Scan Recorded!";
+        statusText.style.color = "#34d399";
+
+        // Add to log
+        const logItem = `
+          <div style="padding:10px 12px; background:var(--surface-muted); border-radius:8px; font-size:12.5px; display:flex; justify-content:space-between; align-items:center; border-left:3px solid #10b981;">
+            <div>
+              <b style="color:var(--gray-900);">${data.student}</b>
+              <small style="display:block; color:var(--gray-500);">${data.college} · Year ${data.year}</small>
+            </div>
+            <span style="font-size:11px; font-weight:700; color:#10b981;">${data.time || 'Recorded'}</span>
+          </div>`;
+        logList.insertAdjacentHTML("afterbegin", logItem);
+      } else {
+        resultBox.style.background = data.type === 'duplicate' ? "#fef3c7" : "#fee2e2";
+        resultBox.style.color = data.type === 'duplicate' ? "#b45309" : "#b91c1c";
+        resultBox.innerHTML = `<strong>${data.message}</strong> ${data.student || ''}`;
+        statusText.innerText = data.type === 'duplicate' ? "Already Recorded" : "Invalid Scan";
+        statusText.style.color = "#f87171";
+      }
+    } catch (err) {
+      resultBox.style.display = "block";
+      resultBox.style.background = "#fee2e2";
+      resultBox.style.color = "#b91c1c";
+      resultBox.innerText = "Error communicating with server.";
+    }
+  }
+
+  function toggleCamera() {
+    if (scanner) {
+      scanner.stop().then(() => {
+        scanner = null;
+        readerDiv.style.display = "none";
+        qrPlaceholder.style.display = "grid";
+        statusText.innerText = "Scanning...";
+        document.getElementById("startScanBtn").innerText = "Scan Code";
+      });
+    } else {
+      readerDiv.style.display = "block";
+      qrPlaceholder.style.display = "none";
+      scanner = new Html5Qrcode("reader");
+      scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 180, height: 180 } },
+        decodedText => {
+          sendScan({ qr_token: decodedText });
+        }
+      ).then(() => {
+        document.getElementById("startScanBtn").innerText = "Stop Camera";
+        statusText.innerText = "Camera Active";
+      }).catch(err => {
+        readerDiv.style.display = "none";
+        qrPlaceholder.style.display = "grid";
+        resultBox.style.display = "block";
+        resultBox.style.background = "#fee2e2";
+        resultBox.style.color = "#b91c1c";
+        resultBox.innerText = "Camera access unavailable. Use manual ID input below.";
+      });
+    }
+  }
+
+  document.getElementById("startScanBtn").onclick = toggleCamera;
+  document.getElementById("manualRecordBtn").onclick = () => {
+    const val = document.getElementById("studentIdInput").value.trim();
+    if (val) sendScan({ student_id: val });
+  };
+  function testScan(id) {
+    sendScan({ student_id: id });
+  }
+</script>
+{% endblock %}

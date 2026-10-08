@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up · ISAC Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261007-3">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <!-- Left Hero Branding -->
+    <section class="auth-brand">
+      <div class="brand-curved-bg"></div>
+      <div class="auth-brand-content">
+        <div class="brand-logos">
+          <div class="logo-badge">
+            <img src="{% static 'img/dmmmsu-logo.png' %}" alt="DMMMSU Logo" class="brand-logo-img">
+          </div>
+          <div class="logo-badge">
+            <img src="{% static 'img/csbo-logo.png' %}" alt="CSBO Logo" class="brand-logo-img">
+          </div>
+        </div>
+        <h1 class="brand-title">ISAC Portal</h1>
+        <p class="brand-subtitle">Integrated Student Activity & Clearance Portal</p>
+        <span class="brand-subtext">Campus Student Body Organization — DMMMSU-NLUC</span>
+        <div class="brand-badges-row">
+          <span class="pill-tag"><i data-lucide="user-plus"></i> Student Registration</span>
+          <span class="pill-tag"><i data-lucide="badge-check"></i> Automated Clearance</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Signup Card -->
+    <section class="auth-card-section">
+      <div class="auth-card signup-card">
+        <div class="auth-card-head">
+          <h2 class="auth-heading">Create an account</h2>
+          <p class="auth-subheading">Fill in your information to register for your student portal.</p>
+        </div>
+
+        {% if form.errors %}
+          <div class="alert error">
+            <i data-lucide="alert-circle"></i>
+            <div>
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'signup' %}" class="auth-form" autocomplete="on">
+          {% csrf_token %}
+
+          <div class="form-row-2">
+            <div class="input-field-group">
+              <label for="id_first_name" class="field-label">First Name *</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="user"></i></span>
+                <input 
+                  id="id_first_name" 
+                  type="text" 
+                  name="first_name" 
+                  class="form-input" 
+                  placeholder="e.g. Juan" 
+                  value="{{ form.first_name.value|default:'' }}" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label for="id_middle_name" class="field-label">Middle Name</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="user"></i></span>
+                <input 
+                  id="id_middle_name" 
+                  type="text" 
+                  name="middle_name" 
+                  class="form-input" 
+                  placeholder="e.g. Santos" 
+                  value="{{ form.middle_name.value|default:'' }}"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="input-field-group">
+              <label for="id_last_name" class="field-label">Last Name *</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="user"></i></span>
+                <input 
+                  id="id_last_name" 
+                  type="text" 
+                  name="last_name" 
+                  class="form-input" 
+                  placeholder="e.g. Dela Cruz" 
+                  value="{{ form.last_name.value|default:'' }}" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label for="id_student_no" class="field-label">Student ID No.</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="id-card"></i></span>
+                <input 
+                  id="id_student_no" 
+                  type="text" 
+                  name="student_no" 
+                  class="form-input" 
+                  placeholder="e.g. 2026-0045" 
+                  value="{{ form.student_no.value|default:'' }}"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <label for="id_username" class="field-label">Username *</label>
+            <div class="field-control has-left-icon">
+              <span class="input-icon-left"><i data-lucide="user-round"></i></span>
+              <input 
+                id="id_username" 
+                type="text" 
+                name="username" 
+                class="form-input" 
+                placeholder="e.g. juan_delacruz" 
+                value="{{ form.username.value|default:'' }}" 
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                minlength="3"
+                maxlength="30"
+                pattern="[A-Za-z][A-Za-z0-9._-]{2,29}"
+                required
+              >
+            </div>
+            <small class="signup-field-help">3–30 characters. Start with a letter; use letters, numbers, dots, underscores, or hyphens.</small>
+          </div>
+
+          <div class="input-field-group">
+            <label for="id_email" class="field-label">Email address *</label>
+            <div class="field-control has-left-icon">
+              <span class="input-icon-left"><i data-lucide="mail"></i></span>
+              <input
+                id="id_email"
+                type="email"
+                name="email"
+                class="form-input"
+                placeholder="name@example.com"
+                value="{{ form.email.value|default:'' }}"
+                autocomplete="email"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="input-field-group signup-program-field">
+              <label for="id_program" class="field-label">Course / Program *</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="book-open"></i></span>
+                {{ form.program }}
+              </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="input-field-group">
+              <label for="id_year_level" class="field-label">Year level *</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="layers-2"></i></span>
+                {{ form.year_level }}
+              </div>
+            </div>
+            <div class="input-field-group">
+              <label for="id_requested_role" class="field-label">Requested role *</label>
+              <div class="field-control has-left-icon">
+                <span class="input-icon-left"><i data-lucide="shield-check"></i></span>
+                {{ form.requested_role }}
+              </div>
+            </div>
+          </div>
+          <p class="signup-role-note">Student access is immediate. Officer and Administrator access requires approval by a system administrator.</p>
+
+          <div class="form-row-2">
+            <div class="input-field-group">
+              <label for="id_password" class="field-label">Password *</label>
+              <div class="field-control has-left-icon has-right-icon">
+                <span class="input-icon-left"><i data-lucide="lock"></i></span>
+                <input 
+                  id="id_password" 
+                  type="password" 
+                  name="password" 
+                  class="form-input" 
+                  placeholder="••••••••" 
+                  required
+                >
+                <button 
+                  type="button" 
+                  class="password-toggle-btn" 
+                  aria-label="Toggle password visibility"
+                  onclick="togglePassword('id_password', this)"
+                >
+                  <i data-lucide="eye" class="eye-icon"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label for="id_password_confirm" class="field-label">Confirm Password *</label>
+              <div class="field-control has-left-icon has-right-icon">
+                <span class="input-icon-left"><i data-lucide="shield-check"></i></span>
+                <input 
+                  id="id_password_confirm" 
+                  type="password" 
+                  name="password_confirm" 
+                  class="form-input" 
+                  placeholder="••••••••" 
+                  required
+                >
+                <button 
+                  type="button" 
+                  class="password-toggle-btn" 
+                  aria-label="Toggle password confirmation visibility"
+                  onclick="togglePassword('id_password_confirm', this)"
+                >
+                  <i data-lucide="eye" class="eye-icon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn primary btn-signin full">Create Account</button>
+
+          <div class="signup-prompt">
+            <span>Already have an account?</span>
+            <a href="{% url 'login' %}" class="signup-link">Sign in here</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

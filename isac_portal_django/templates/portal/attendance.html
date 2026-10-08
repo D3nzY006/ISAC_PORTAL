@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block page_title %}Attendance Records{% endblock %}
+{% block content %}
+<section class="card attendance-card">
+  <div class="attendance-heading">
+    <div>
+      <h2>Attendance records</h2>
+      <p>Review attendance by student and event.</p>
+    </div>
+    {% if can_manage_attendance %}
+      <a href="{% url 'attendance_create' %}" class="btn primary attendance-add"><i data-lucide="user-plus" aria-hidden="true"></i>Add student</a>
+    {% endif %}
+  </div>
+  <form class="attendance-search" method="get">
+    <label class="sr-only" for="attendance-search">Search attendance</label>
+    <input id="attendance-search" name="q" value="{{ q }}" placeholder="Search student ID, name, or event">
+    <button class="btn" type="submit"><i data-lucide="search" aria-hidden="true"></i>Search</button>
+  </form>
+  <div class="table-wrap attendance-table-wrap">
+    <table class="attendance-table">
+      <thead><tr><th>Student</th><th>College</th><th>Event</th><th>Scanned</th><th>Status</th>{% if can_manage_attendance %}<th>Actions</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for r in records %}
+          <tr>
+            <td><strong>{{ r.student.student_no }}</strong><small>{{ r.student.full_name }}</small></td>
+            <td>{{ r.student.college.code|default:"—" }}</td>
+            <td>{{ r.event.title }}</td>
+            <td>{{ r.scanned_at|date:"M d, Y g:i A" }}</td>
+            <td><span class="attendance-status {{ r.status }}">{{ r.get_status_display }}</span></td>
+            {% if can_manage_attendance %}
+              <td>
+                <div class="attendance-actions" aria-label="Attendance actions for {{ r.student.full_name }} at {{ r.event.title }}">
+                  <form method="post" action="{% url 'attendance_update_status' r.id %}">{% csrf_token %}<input type="hidden" name="status" value="present"><button class="attendance-action present" type="submit" aria-label="Mark present" title="Mark present"><i data-lucide="check" aria-hidden="true"></i></button></form>
+                  <form method="post" action="{% url 'attendance_update_status' r.id %}">{% csrf_token %}<input type="hidden" name="status" value="absent"><button class="attendance-action absent" type="submit" aria-label="Mark absent" title="Mark absent"><i data-lucide="x" aria-hidden="true"></i></button></form>
+                  <form method="post" action="{% url 'attendance_update_status' r.id %}">{% csrf_token %}<input type="hidden" name="status" value="excused"><button class="attendance-action excused" type="submit" aria-label="Mark excused" title="Mark excused"><i data-lucide="calendar-check" aria-hidden="true"></i></button></form>
+                  <form method="post" action="{% url 'attendance_delete' r.id %}" onsubmit="return confirm('Delete this attendance record?')">{% csrf_token %}<button class="attendance-action delete" type="submit" aria-label="Delete attendance" title="Delete record"><i data-lucide="trash-2" aria-hidden="true"></i></button></form>
+                </div>
+              </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="{% if can_manage_attendance %}6{% else %}5{% endif %}" class="attendance-empty">No attendance records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

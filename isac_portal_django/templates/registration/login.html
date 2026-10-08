@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login · ISAC Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261007-2">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <!-- Left Hero Branding -->
+    <section class="auth-brand">
+      <div class="brand-curved-bg"></div>
+      <div class="auth-brand-content">
+        <div class="brand-logos">
+          <div class="logo-badge">
+            <img src="{% static 'img/dmmmsu-logo.png' %}" alt="DMMMSU Logo" class="brand-logo-img">
+          </div>
+          <div class="logo-badge">
+            <img src="{% static 'img/csbo-logo.png' %}" alt="CSBO Logo" class="brand-logo-img">
+          </div>
+        </div>
+        <h1 class="brand-title">ISAC Portal</h1>
+        <p class="brand-subtitle">Integrated Student Activity & Clearance Portal</p>
+        <span class="brand-subtext">Campus Student Body Organization — DMMMSU-NLUC</span>
+        <div class="brand-badges-row">
+          <span class="pill-tag"><i data-lucide="shield-check"></i> Verified Security</span>
+          <span class="pill-tag"><i data-lucide="qr-code"></i> Instant QR Clearance</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Login Card -->
+    <section class="auth-card-section">
+      <div class="auth-card">
+        <div class="auth-card-head">
+          <h2 class="auth-heading">Welcome back</h2>
+          <p class="auth-subheading">Sign in to continue to your portal.</p>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert {{ message.tags }}"><i data-lucide="check-circle-2"></i> {{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        {% if form.errors %}
+          <div class="alert error">
+            <i data-lucide="alert-circle"></i>
+            <span>Invalid username or password.</span>
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}" class="auth-form" autocomplete="on">
+          {% csrf_token %}
+          <div class="input-field-group">
+            <label for="usernameInput" class="field-label">Username</label>
+            <div class="field-control has-left-icon">
+              <span class="input-icon-left"><i data-lucide="user-round"></i></span>
+              <input 
+                id="usernameInput" 
+                type="text" 
+                name="username" 
+                class="form-input" 
+                placeholder="Username" 
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                required 
+                autofocus
+              >
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <label for="passwordInput" class="field-label">Password</label>
+            <div class="field-control has-left-icon has-right-icon">
+              <span class="input-icon-left"><i data-lucide="lock"></i></span>
+              <input 
+                id="passwordInput" 
+                type="password" 
+                name="password" 
+                class="form-input" 
+                placeholder="••••••••" 
+                autocomplete="current-password"
+                required
+              >
+              <button 
+                type="button" 
+                class="password-toggle-btn" 
+                aria-label="Toggle password visibility"
+                onclick="togglePassword('passwordInput', this)"
+              >
+                <i data-lucide="eye" class="eye-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn primary btn-signin full">Sign In</button>
+
+          <div class="signup-prompt">
+            <span>Don't have an account?</span>
+            <a href="{% url 'signup' %}" class="signup-link">Sign up here</a>
+          </div>
+        </form>
+
+        <!-- Demo Accounts Box -->
+        <div class="demo-box">
+          <div class="demo-box-head">
+            <i data-lucide="key-round"></i>
+            <b>Demo accounts</b>
+          </div>
+          <div class="demo-list">
+            <div class="demo-item">
+              <span class="role-badge student">Student</span>
+              <code>student1</code> / <code>Student12345</code>
+            </div>
+            <div class="demo-item">
+              <span class="role-badge officer">Officer</span>
+              <code>officer1</code> / <code>Officer12345</code>
+            </div>
+            <div class="demo-item">
+              <span class="role-badge admin">Admin</span>
+              <code>admin</code> / <code>Admin12345</code>
+            </div>
+          </div>
+          <small class="demo-hint">Tip: Click to auto-fill or enter credentials directly.</small>
+        </div>
+
+        <div class="showcase-banner">
+          <a href="{% url 'showcase' %}" class="showcase-link">
+            <i data-lucide="sparkles"></i> View System UI Slides Showcase
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    lucide.createIcons();
+    function fillDemo(u, p) {
+      document.getElementById('usernameInput').value = u;
+      document.getElementById('passwordInput').value = p;
+    }
+    // Bind click to demo accounts
+    document.querySelectorAll('.demo-item').forEach(el => {
+      el.style.cursor = 'pointer';
+      el.title = 'Click to fill';
+      el.addEventListener('click', () => {
+        const codes = el.querySelectorAll('code');
+        if (codes.length >= 2) {
+          fillDemo(codes[0].innerText.trim(), codes[1].innerText.trim());
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Digital Student ID · ISAC Portal{% endblock %}
+{% block page_title %}Digital Student ID{% endblock %}
+
+{% block content %}
+<section class="digital-id-page" aria-labelledby="digital-id-heading">
+  <article class="digital-id-card">
+    <header class="digital-id-header">
+      <img class="digital-id-logo" src="{% static 'img/csbo-logo.png' %}" alt="CSBO logo">
+      <div class="digital-id-institution">
+        <span>Don Mariano Marcos Memorial State University</span>
+        <h2 id="digital-id-heading">North La Union Campus</h2>
+        <p>Campus Student Body Organization</p>
+      </div>
+      <span class="digital-id-badge">Student ID</span>
+    </header>
+
+    <div class="digital-id-main">
+      <div class="digital-id-student">
+        {% if profile.photo %}
+          <img class="digital-id-photo" src="{{ profile.photo.url }}" alt="Photo of {{ profile.full_name }}">
+        {% else %}
+          <div class="digital-id-photo digital-id-initials" aria-hidden="true">{{ profile.first_name|first|default:"S" }}{{ profile.last_name|first|default:"" }}</div>
+        {% endif %}
+        <div class="digital-id-details">
+          <span class="digital-id-label">Student</span>
+          <h3>{{ profile.full_name }}</h3>
+          <p class="digital-id-number">{{ profile.student_no|default:"Student number unavailable" }}</p>
+          <dl>
+            <div><dt>College</dt><dd>{{ profile.college.code|default:"—" }}</dd></div>
+            <div><dt>Program</dt><dd>{{ profile.program.name|default:"—" }}</dd></div>
+            <div><dt>Year level</dt><dd>{{ profile.year_level|default:"—" }}</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <aside class="digital-id-qr" aria-label="Attendance QR code">
+        <img src="{{ qr_data }}" alt="QR code for {{ profile.full_name }}’s campus attendance">
+        <p>Present this code at campus activities</p>
+      </aside>
+    </div>
+
+    <footer class="digital-id-footer">
+      <span><i data-lucide="shield-check" aria-hidden="true"></i> Official ISAC Portal digital ID</span>
+      <span>For campus activity attendance</span>
+    </footer>
+  </article>
+</section>
+{% endblock %}

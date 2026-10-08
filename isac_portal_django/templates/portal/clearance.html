@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Clearance · ISAC Portal{% endblock %}
+{% block page_title %}Digital Clearance{% endblock %}
+
+{% block content %}
+<section class="module-page student-clearance-page">
+  <article class="clearance-progress-card">
+    <div><span class="module-eyebrow">Your requirements</span><h2>Clearance {{ overall }}</h2><p>{{ progress }}% of your listed clearance requirements are complete.</p><div class="clearance-progress-track" role="progressbar" aria-label="Clearance progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress }}"><span style="width: {{ progress }}%"></span></div></div>
+    <div class="clearance-progress-number">{{ progress }}<small>%</small></div>
+  </article>
+
+  <div class="module-section-heading"><div><h3>Requirements</h3><p>Open a section to review its status and details.</p></div><span class="module-heading-chip"><i data-lucide="list-checks" aria-hidden="true"></i> {{ records|length }} total</span></div>
+  {% regroup records by status as status_groups %}
+  <div class="clearance-groups student-clearance-groups">
+    {% for group in status_groups %}
+    <details class="clearance-group" {% if group.grouper == "pending" or forloop.first %}open{% endif %}>
+      <summary><span class="clearance-group-icon {{ group.grouper }}"><i data-lucide="{% if group.grouper == 'completed' or group.grouper == 'approved' %}circle-check{% elif group.grouper == 'submitted' %}send{% else %}clock-3{% endif %}" aria-hidden="true"></i></span><span><strong>{{ group.grouper|title }}</strong><small>{{ group.list|length }} requirement{{ group.list|length|pluralize }}</small></span><i class="clearance-chevron" data-lucide="chevron-down" aria-hidden="true"></i></summary>
+      <div class="clearance-group-content">
+        {% for r in group.list %}
+        <article class="student-requirement-row">
+          <span class="requirement-state {{ r.status }}"><i data-lucide="{% if r.status == 'completed' or r.status == 'approved' %}check{% elif r.status == 'submitted' %}hourglass{% else %}circle-dashed{% endif %}" aria-hidden="true"></i></span>
+          <div class="requirement-copy"><strong>{{ r.requirement.name }}</strong><p>{{ r.requirement.description|default:"Your status will update when this requirement is reviewed." }}</p><ol class="clearance-stepper" aria-label="{{ r.requirement.name }} review steps">{% for step in r.workflow_steps %}<li class="{% if step.complete %}complete{% elif step.current %}current{% endif %}"><span><i data-lucide="{% if step.complete %}check{% elif step.current %}clock-3{% else %}circle{% endif %}" aria-hidden="true"></i></span><small>{{ step.label|title }}</small></li>{% endfor %}</ol></div>
+          <span class="badge clearance-status {{ r.status }}">{{ r.status|title }}</span>
+        </article>
+        {% endfor %}
+      </div>
+    </details>
+    {% empty %}<div class="module-empty"><span><i data-lucide="list-checks" aria-hidden="true"></i></span><h3>No requirements listed</h3><p>Your clearance requirements will appear here.</p></div>{% endfor %}
+  </div>
+
+  <div class="module-section-heading"><div><h3>Fines and fees</h3><p>Review any outstanding student account charges.</p></div></div>
+  <div class="module-panel clearance-fines-panel">
+    {% for f in fines %}<article class="clearance-fine-row"><span class="clearance-fine-icon"><i data-lucide="receipt" aria-hidden="true"></i></span><div><strong>{{ f.reason }}</strong><small>{{ f.event.title|default:"Campus regulation" }} · {{ f.created_at|date:"M d, Y" }}</small></div><strong class="clearance-fine-amount">₱{{ f.amount }}</strong><span class="payment-status {{ f.status }}">{{ f.status|title }}</span></article>
+    {% empty %}<p class="clearance-fines-empty"><i data-lucide="circle-check" aria-hidden="true"></i> You have no fines or fees on record.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

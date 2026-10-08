@@ -1,0 +1,136 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ISAC Portal · DMMMSU-NLUC{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261007-17">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <img src="{% static 'img/csbo-logo.png' %}" alt="CSBO logo">
+        <div>
+          <b>ISAC Portal</b>
+          <small>DMMMSU–NLUC CSBO</small>
+        </div>
+      </div>
+      <nav>
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'student_dashboard' or request.resolver_match.url_name == 'officer_dashboard' %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i>Dashboard
+        </a>
+
+        {% if user.profile.role == 'student' %}
+          <a href="{% url 'digital_id' %}" class="{% if request.resolver_match.url_name == 'digital_id' %}active{% endif %}">
+            <i data-lucide="id-card"></i>Digital ID
+          </a>
+          <a href="{% url 'event_calendar' %}" class="{% if request.resolver_match.url_name == 'event_calendar' %}active{% endif %}">
+            <i data-lucide="calendar-days"></i>Event Calendar
+          </a>
+          <a href="{% url 'my_activities' %}" class="{% if request.resolver_match.url_name == 'my_activities' %}active{% endif %}">
+            <i data-lucide="activity"></i>My Activities
+          </a>
+          <a href="{% url 'clearance' %}" class="{% if request.resolver_match.url_name == 'clearance' %}active{% endif %}">
+            <i data-lucide="badge-check"></i>Clearance
+          </a>
+        {% else %}
+          <a href="{% url 'events_manage' %}" class="{% if 'event' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="calendar"></i>Events
+          </a>
+          <a href="{% url 'scanner' %}" class="{% if request.resolver_match.url_name == 'scanner' %}active{% endif %}">
+            <i data-lucide="scan-line"></i>QR Scanner
+          </a>
+          <a href="{% url 'attendance_records' %}" class="{% if request.resolver_match.url_name == 'attendance_records' %}active{% endif %}">
+            <i data-lucide="clipboard-check"></i>Attendance
+          </a>
+          <a href="{% url 'fines' %}" class="{% if 'fine' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="wallet-cards"></i>Fines
+          </a>
+          <a href="{% url 'clearance_manage' %}" class="{% if 'clearance' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="badge-check"></i>Clearance
+          </a>
+          <a href="{% url 'announcement_manage' %}" class="{% if 'announcement_manage' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="megaphone"></i>Announcements
+          </a>
+          <a href="{% url 'reports' %}" class="{% if 'report' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="file-bar-chart"></i>Reports
+          </a>
+          {% if user.profile.role == 'admin' %}
+            <a href="{% url 'user_manage' %}" class="{% if request.resolver_match.url_name == 'user_manage' %}active{% endif %}">
+              <i data-lucide="users"></i>Users
+            </a>
+          {% endif %}
+        {% endif %}
+
+        <a href="{% url 'announcements' %}" class="{% if request.resolver_match.url_name == 'announcements' %}active{% endif %}">
+          <i data-lucide="bell"></i>Public Announcements
+        </a>
+        <a href="{% url 'showcase' %}" class="{% if request.resolver_match.url_name == 'showcase' %}active{% endif %}" style="color: #6ee7b7;">
+          <i data-lucide="sparkles" style="color: #6ee7b7;"></i>UI Slides Showcase
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="icon-btn" id="themeToggle" title="Toggle theme" type="button">
+          <i data-lucide="moon"></i>
+        </button>
+        <form method="post" action="{% url 'logout' %}" style="display:inline; width:100%;">
+          {% csrf_token %}
+          <button type="submit" class="logout" style="background:none; border:none; width:100%; cursor:pointer;">
+            <i data-lucide="log-out"></i>Logout
+          </button>
+        </form>
+      </div>
+    </aside>
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
+
+    <main class="main" id="main-content" tabindex="-1">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false" type="button">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+            <span class="crumb">DMMMSU–NLUC Campus · Integrated Student Activity & Clearance</span>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a href="{% url 'showcase' %}" class="btn" style="background: rgba(16, 185, 129, 0.1); color: var(--emerald-600); border: 1px solid rgba(16, 185, 129, 0.2); padding: 6px 12px; font-size: 12px; border-radius: 999px;">
+            <i data-lucide="slideshow"></i> Interactive Tour
+          </a>
+          <span class="user-chip">
+            <i data-lucide="user-check" style="width:14px; height:14px; color:var(--emerald-600);"></i>
+            {{ user.get_full_name|default:user.username }} · {{ user.profile.get_role_display|default:"Student" }}
+          </span>
+        </div>
+      </header>
+
+      <div class="content">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="toast {{ message.tags }}">
+              <i data-lucide="info"></i> {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <script src="{% static 'js/app.js' %}?v=20261007-9"></script>
+  {% block scripts %}{% endblock %}
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

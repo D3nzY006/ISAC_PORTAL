@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}User Management · ISAC Portal{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<section class="users-page" aria-labelledby="users-heading">
+  <div class="users-intro">
+    <div>
+      <span class="users-eyebrow">Access and accounts</span>
+      <h2 id="users-heading">Manage portal users</h2>
+      <p>Review accounts, update access, and manage administrator permissions.</p>
+    </div>
+    <span class="users-secure"><i data-lucide="shield-check" aria-hidden="true"></i> Admin access</span>
+  </div>
+
+  <div class="users-stats" aria-label="User account summary">
+    <article class="users-stat"><span>Total accounts</span><strong>{{ total_users }}</strong><i data-lucide="users" aria-hidden="true"></i></article>
+    <article class="users-stat"><span>Active accounts</span><strong>{{ active_count }}</strong><i data-lucide="user-round-check" aria-hidden="true"></i></article>
+    <article class="users-stat"><span>Administrators</span><strong>{{ admin_count }}</strong><i data-lucide="shield" aria-hidden="true"></i></article>
+    <article class="users-stat"><span>Role approvals</span><strong>{{ role_request_count }}</strong><i data-lucide="shield-question" aria-hidden="true"></i></article>
+  </div>
+
+  {% if role_requests %}
+  <section class="role-requests-panel" aria-labelledby="role-requests-heading">
+    <div class="role-requests-heading"><div><span class="users-eyebrow">Access review</span><h3 id="role-requests-heading">Pending role requests</h3><p>Approve officer or administrator access only after reviewing the request.</p></div><span class="role-requests-count">{{ role_request_count }} pending</span></div>
+    <div class="role-requests-list">
+      {% for profile in role_requests %}
+      <article class="role-request-item">
+        <div class="role-request-person"><span class="user-avatar" aria-hidden="true">{{ profile.first_name|first|default:profile.user.username|first }}{{ profile.last_name|first }}</span><div><strong>{{ profile.full_name }}</strong><small>@{{ profile.user.username }} · {{ profile.user.email }}</small></div></div>
+        <div class="role-request-details"><span class="user-role-request">Requests {{ profile.get_requested_role_display }}</span><small>{{ profile.college.code|default:"College not set" }}{% if profile.program %} · {{ profile.program.name }}{% endif %} · Year {{ profile.year_level }}</small></div>
+        <div class="role-request-actions">
+          <form method="post" action="{% url 'user_role_request' profile.user_id %}">{% csrf_token %}<button class="user-action promote" type="submit" name="role_action" value="approve"><i data-lucide="user-round-check" aria-hidden="true"></i><span>Approve {{ profile.get_requested_role_display }}</span></button></form>
+          <form method="post" action="{% url 'user_role_request' profile.user_id %}">{% csrf_token %}<button class="user-action delete" type="submit" name="role_action" value="reject"><i data-lucide="x" aria-hidden="true"></i><span>Decline</span></button></form>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="users-panel">
+    <form class="users-filters" method="get" role="search">
+      <label class="users-search-field">
+        <span class="sr-only">Search by name, username, email, student number, or user ID</span>
+        <i data-lucide="search" aria-hidden="true"></i>
+        <input type="search" name="q" value="{{ query }}" placeholder="Search users...">
+      </label>
+      <label>
+        <span class="sr-only">Filter by role</span>
+        <select name="role" aria-label="Filter by role">
+          <option value="">All roles</option>
+          <option value="student" {% if selected_role == "student" %}selected{% endif %}>Student</option>
+          <option value="officer" {% if selected_role == "officer" %}selected{% endif %}>CSBO Officer</option>
+          <option value="admin" {% if selected_role == "admin" %}selected{% endif %}>Administrator</option>
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">Filter by account status</span>
+        <select name="status" aria-label="Filter by account status">
+          <option value="">All statuses</option>
+          <option value="active" {% if selected_status == "active" %}selected{% endif %}>Active</option>
+          <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Inactive</option>
+        </select>
+      </label>
+      <button class="btn primary users-filter-button" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i> Filter</button>
+      {% if query or selected_role or selected_status %}<a class="users-clear-filters" href="{% url 'user_manage' %}">Clear filters</a>{% endif %}
+    </form>
+
+    <div class="users-table-heading">
+      <div><h3>Accounts</h3><p>{{ page_obj.paginator.count }} matching account{{ page_obj.paginator.count|pluralize }}</p></div>
+      {% if page_obj.paginator.count %}<span class="users-page-count">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% endif %}
+    </div>
+
+    <div class="users-table-wrap">
+      <table class="users-table">
+        <thead><tr><th scope="col">ID</th><th scope="col">User</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+        <tbody>
+          {% for account in users %}
+          <tr>
+            <td class="user-id" data-label="ID">#{{ account.id }}</td>
+            <td data-label="User">
+              <div class="user-cell">
+                <span class="user-avatar" aria-hidden="true">{{ account.first_name|first|default:account.username|first }}{{ account.last_name|first }}</span>
+                <span class="user-primary"><strong>{{ account.get_full_name|default:account.username }}</strong><small>@{{ account.username }}{% if account.profile.student_no %} · {{ account.profile.student_no }}{% endif %}</small></span>
+              </div>
+            </td>
+            <td data-label="Role"><span class="user-role {{ account.profile.role|default:'student' }}">{{ account.profile.get_role_display|default:"Student" }}</span>{% if account.profile.requested_role %}<small class="user-role-request-note">Requests {{ account.profile.get_requested_role_display }}</small>{% endif %}</td>
+            <td data-label="Status"><span class="user-status {% if account.is_active %}active{% else %}inactive{% endif %}"><span></span>{{ account.is_active|yesno:"Active,Inactive" }}</span></td>
+            <td data-label="Actions">
+              <div class="user-actions">
+                <a class="user-action edit" href="{% url 'user_edit' account.id %}" aria-label="Edit {{ account.username }}" title="Edit user"><i data-lucide="square-pen" aria-hidden="true"></i><span>Edit</span></a>
+                {% if account.profile.role == "admin" and account.id != request.user.id %}
+                <form method="post" action="{% url 'user_demote' account.id %}" class="user-action-form" onsubmit="return confirm('Remove administrator access from {{ account.username|escapejs }} and set this account to Student?');">
+                  {% csrf_token %}
+                  <button class="user-action delete" type="submit" aria-label="Demote {{ account.username }} to student" title="Remove administrator access"><i data-lucide="shield-off" aria-hidden="true"></i><span>Demote</span></button>
+                </form>
+                {% elif account.profile.role != "admin" and not account.profile.requested_role %}
+                <form method="post" action="{% url 'user_promote' account.id %}" class="user-action-form">
+                  {% csrf_token %}
+                  <button class="user-action promote" type="submit" aria-label="Promote {{ account.username }} to administrator" title="Promote to administrator"><i data-lucide="shield-plus" aria-hidden="true"></i><span>Promote</span></button>
+                </form>
+                {% endif %}
+                {% if account.id != request.user.id %}
+                <form method="post" action="{% url 'user_delete' account.id %}" class="user-action-form" onsubmit="return confirm('Delete {{ account.username|escapejs }}? Accounts linked to attendance or clearance records cannot be removed.');">
+                  {% csrf_token %}
+                  <button class="user-action delete" type="submit" aria-label="Delete {{ account.username }}" title="Delete user"><i data-lucide="trash-2" aria-hidden="true"></i><span>Delete</span></button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td class="users-empty" colspan="5"><span><i data-lucide="users-round" aria-hidden="true"></i></span><strong>No users found</strong><p>Try changing or clearing your search and filters.</p></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="users-pagination" aria-label="User list pages">
+      <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+      <div>
+        {% if page_obj.has_previous %}<a href="?q={{ query|urlencode }}&amp;role={{ selected_role|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><i data-lucide="chevron-left" aria-hidden="true"></i> Previous</a>{% else %}<span class="disabled"><i data-lucide="chevron-left" aria-hidden="true"></i> Previous</span>{% endif %}
+        {% if page_obj.has_next %}<a href="?q={{ query|urlencode }}&amp;role={{ selected_role|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;page={{ page_obj.next_page_number }}" rel="next">Next <i data-lucide="chevron-right" aria-hidden="true"></i></a>{% else %}<span class="disabled">Next <i data-lucide="chevron-right" aria-hidden="true"></i></span>{% endif %}
+      </div>
+    </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

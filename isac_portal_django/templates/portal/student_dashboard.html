@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard · ISAC Portal{% endblock %}
+{% block page_title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<!-- Top Pill Navigation Tabs (Matching Picture 2) -->
+<div class="dashboard-tabs-bar">
+  <a href="{% url 'dashboard' %}" class="dash-pill-btn active">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+  </a>
+  <a href="{% url 'clearance' %}" class="dash-pill-btn">
+    <i data-lucide="badge-check"></i> Clearance
+  </a>
+  <a href="{% url 'my_activities' %}" class="dash-pill-btn">
+    <i data-lucide="graduation-cap"></i> Activities & Events
+  </a>
+</div>
+
+<!-- Student Profile Hero Card (Matching Picture 2) -->
+<div class="student-profile-hero">
+  <div class="profile-main-info">
+    <div class="student-avatar">
+      {{ profile.first_name|first|default:"P" }}{{ profile.last_name|first|default:"I" }}
+    </div>
+    <div class="student-meta">
+      <h2>{{ profile.full_name|default:"Paulinia Indra" }}</h2>
+      <p>Undergraduate {{ profile.year_level|default:"3" }}{% if profile.year_level == 1 %}st{% elif profile.year_level == 2 %}nd{% elif profile.year_level == 3 %}rd{% else %}th{% endif %} Year · {{ profile.program.name|default:"BS Information Systems" }}</p>
+      <span class="student-id-badge">Student ID: {{ profile.student_no|default:"2026-0001" }}</span>
+    </div>
+  </div>
+  <a href="{% url 'digital_id' %}" class="btn primary pill">
+    <i data-lucide="id-card"></i> Student ID
+  </a>
+</div>
+
+<!-- Activity Completer & Clearance Status Cards (Matching Picture 2) -->
+<div class="dashboard-grid-2">
+  <!-- Left Card: Activity Completer -->
+  <section class="ui-card">
+    <div class="ui-card-head">
+      <h3>Activity Completer</h3>
+      <span class="status-pill completed">{{ progress }}% Completed</span>
+    </div>
+    <div class="activity-completer-content">
+      <div class="activity-metric-row">
+        <span>Campus Activities</span>
+        <b>10 Records</b>
+      </div>
+      <div class="activity-metric-row">
+        <span>Events Attending</span>
+        <b>{{ attended }} Attended</b>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width: {{ progress }}%;"></div>
+      </div>
+      <div class="activity-metric-row">
+        <span>Participation Points</span>
+        <b>{{ points }} pts</b>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width: {% widthratio points 20 100 %}%;"></div>
+      </div>
+      <div class="activity-metric-row" style="margin-top: 6px;">
+        <span style="font-size: 13px; color: var(--gray-500);">Overall Clearance Readiness</span>
+        <b style="color: var(--emerald-600);">Progress {{ progress }}%</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right Card: Clearance Status Checklist -->
+  <section class="ui-card">
+    <div class="ui-card-head">
+      <h3>Clearance Status</h3>
+      <a href="{% url 'clearance' %}" style="font-size: 13px; font-weight: 600;">View Details &rarr;</a>
+    </div>
+    <ul class="checklist-container">
+      <li class="checklist-item">
+        <span class="check-icon-box"><i data-lucide="check"></i></span>
+        <span>Profile Info</span>
+      </li>
+      <li class="checklist-item">
+        <span class="check-icon-box"><i data-lucide="check"></i></span>
+        <span>Department clearance</span>
+      </li>
+      <li class="checklist-item">
+        <span class="check-icon-box"><i data-lucide="check"></i></span>
+        <span>Requirements</span>
+      </li>
+      <li class="checklist-item">
+        <span class="check-icon-box"><i data-lucide="check"></i></span>
+        <span>Event complete</span>
+      </li>
+      <li class="checklist-item">
+        <span class="check-icon-box"><i data-lucide="check"></i></span>
+        <span>Upcoming deadlines</span>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<!-- Detailed Clearance Status Breakdown -->
+<div class="ui-card" style="margin-bottom: 24px;">
+  <div class="ui-card-head">
+    <h3>Clearance Status Requirements</h3>
+    <a href="{% url 'clearance' %}" class="btn" style="padding: 6px 14px; font-size: 12px; background: var(--surface-muted); border: 1px solid var(--border);">
+      Manage All Requirements
+    </a>
+  </div>
+  <div style="overflow-x: auto;">
+    <table class="clearance-checklist-table">
+      <thead>
+        <tr>
+          <th>Requirement Name</th>
+          <th>Required Scope</th>
+          <th>Status</th>
+          <th>Verification</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Department Clearance</b></td>
+          <td>Academic Sign-off</td>
+          <td><span class="status-pill completed">COMPLETED</span></td>
+          <td><i data-lucide="badge-check" style="width:16px; color:#10b981;"></i> Verified</td>
+        </tr>
+        <tr>
+          <td><b>Department Checklist</b></td>
+          <td>Faculty Adviser Sign-off</td>
+          <td><span class="status-pill approved">APPROVED</span></td>
+          <td><i data-lucide="badge-check" style="width:16px; color:#10b981;"></i> Verified</td>
+        </tr>
+        <tr>
+          <td><b>CSBO Activity Attendance</b></td>
+          <td>Minimum 2 Events Required</td>
+          <td><span class="status-pill {% if attended >= 2 %}completed{% else %}pending{% endif %}">{% if attended >= 2 %}COMPLETED{% else %}PENDING{% endif %}</span></td>
+          <td>{{ attended }} / 2 Recorded</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Upcoming Events & Latest Announcements -->
+<div class="dashboard-grid-2">
+  <section class="ui-card">
+    <div class="ui-card-head">
+      <h3>Upcoming Campus Events</h3>
+      <a href="{% url 'event_calendar' %}" style="font-size: 13px; font-weight: 600;">View Calendar &rarr;</a>
+    </div>
+    <div style="display: grid; gap: 12px;">
+      {% for e in events %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--surface-muted); border-radius: 8px; border: 1px solid var(--border);">
+          <div>
+            <b style="display: block; font-size: 13.5px; color: var(--gray-900);">{{ e.title }}</b>
+            <small style="color: var(--gray-500); font-size: 12px;">{{ e.event_date|date:"M d, Y" }} · {{ e.venue }}</small>
+          </div>
+          <span class="pill-tag" style="background: var(--emerald-100); color: var(--emerald-700); border:none;">{{ e.points }} pts</span>
+        </div>
+      {% empty %}
+        <p style="color: var(--gray-500); font-size: 13px; text-align: center; padding: 20px;">No upcoming events scheduled.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ui-card">
+    <div class="ui-card-head">
+      <h3>CSBO Announcements</h3>
+      <a href="{% url 'announcements' %}" style="font-size: 13px; font-weight: 600;">View All &rarr;</a>
+    </div>
+    <div style="display: grid; gap: 12px;">
+      {% for a in announcements %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--surface-muted); border-radius: 8px; border: 1px solid var(--border);">
+          <div>
+            <b style="display: block; font-size: 13.5px; color: var(--gray-900);">{{ a.title }}</b>
+            <small style="color: var(--gray-500); font-size: 12px;">{{ a.published_at|date:"M d, Y" }}</small>
+          </div>
+          <span class="status-pill submitted" style="font-size: 10px;">{{ a.category|upper }}</span>
+        </div>
+      {% empty %}
+        <p style="color: var(--gray-500); font-size: 13px; text-align: center; padding: 20px;">No announcements available.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
