@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Event Calendar · ISAC Portal{% endblock %}
+{% block page_title %}Event Calendar{% endblock %}
+
+{% block content %}
+<section class="module-page">
+  <div class="module-heading"><div><span class="module-eyebrow">Campus activities</span><h2>Event calendar</h2><p>Browse activities scheduled for {{ month_title }}.</p></div>{% if user.profile.role == "officer" or user.profile.role == "admin" %}<a class="btn module-secondary" href="{% url 'events_manage' %}"><i data-lucide="rows-3" aria-hidden="true"></i> Event list</a>{% endif %}</div>
+  <div class="calendar-module">
+    <div class="calendar-module-toolbar"><div class="calendar-month-controls"><a class="calendar-month-nav" href="?year={{ previous_month.year }}&amp;month={{ previous_month.month }}" aria-label="Previous month"><i data-lucide="chevron-left" aria-hidden="true"></i></a><h3>{{ month_title }}</h3><a class="calendar-month-nav" href="?year={{ next_month.year }}&amp;month={{ next_month.month }}" aria-label="Next month"><i data-lucide="chevron-right" aria-hidden="true"></i></a></div><a class="calendar-today-link" href="{% url 'event_calendar' %}">Today</a></div>
+    <div class="calendar-month-layout">
+      <div class="calendar-month-grid" role="grid" aria-label="Events in {{ month_title }}">
+        <div class="calendar-weekday" role="columnheader">Sun</div><div class="calendar-weekday" role="columnheader">Mon</div><div class="calendar-weekday" role="columnheader">Tue</div><div class="calendar-weekday" role="columnheader">Wed</div><div class="calendar-weekday" role="columnheader">Thu</div><div class="calendar-weekday" role="columnheader">Fri</div><div class="calendar-weekday" role="columnheader">Sat</div>
+        {% for cell in calendar_days %}<div class="calendar-date-tile {% if cell.today %}today{% endif %}{% if not cell.date %} blank{% endif %}" role="gridcell" {% if cell.date %}aria-label="{{ cell.date|date:'F j, Y' }}{% if cell.events %}, {{ cell.events|length }} event{{ cell.events|length|pluralize }}{% endif %}"{% endif %}>{% if cell.date %}<span class="calendar-date-number">{{ cell.day }}</span>{% for event in cell.events|slice:":2" %}<span class="calendar-event-dot {{ event.status }}" title="{{ event.title }}"><i data-lucide="calendar-days" aria-hidden="true"></i>{{ event.title }}</span>{% endfor %}{% if cell.events|length > 2 %}<small class="calendar-more-events">+{{ cell.events|length|add:"-2" }} more</small>{% endif %}{% endif %}</div>{% endfor %}
+      </div>
+      <aside class="calendar-agenda"><div class="calendar-agenda-heading"><span><i data-lucide="list-todo" aria-hidden="true"></i></span><div><h3>Monthly agenda</h3><p>{{ events|length }} event{{ events|length|pluralize }}</p></div></div>
+        {% for event in events %}<article class="calendar-agenda-event"><span class="calendar-agenda-date"><strong>{{ event.event_date|date:"d" }}</strong><small>{{ event.event_date|date:"M" }}</small></span><div><strong>{{ event.title }}</strong><small>{{ event.start_time|time:"g:i A" }} · {{ event.venue }}</small></div></article>
+        {% empty %}<p class="calendar-agenda-empty">No events scheduled this month.</p>{% endfor %}
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

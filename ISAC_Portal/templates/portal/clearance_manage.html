@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Clearance Desk · ISAC Portal{% endblock %}
+{% block page_title %}Clearance Management{% endblock %}
+
+{% block content %}
+<section class="module-page">
+  <div class="module-heading">
+    <div><span class="module-eyebrow">Student requirements</span><h2>Clearance desk</h2><p>Review submissions and update verification status.</p></div>
+    <span class="module-heading-chip"><i data-lucide="badge-check" aria-hidden="true"></i> {{ records|length }} matching records</span>
+  </div>
+
+  <form method="get" class="module-filter-bar clearance-filter-bar">
+    <label class="module-search"><span>Find a student or requirement</span><input type="search" name="q" value="{{ q }}" placeholder="Student ID, name, college, or requirement" aria-label="Search students by ID, name, college, or requirement"></label>
+    <label><span>Status</span><select name="status_filter"><option value="">All statuses</option><option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Pending</option><option value="submitted" {% if status_filter == "submitted" %}selected{% endif %}>Submitted</option><option value="completed" {% if status_filter == "completed" %}selected{% endif %}>Completed</option><option value="approved" {% if status_filter == "approved" %}selected{% endif %}>Approved</option></select></label>
+    <label><span>Requirement</span><select name="requirement_id"><option value="">All requirements</option>{% for requirement in requirements %}<option value="{{ requirement.id }}" {% if requirement_id == requirement.id|stringformat:"s" %}selected{% endif %}>{{ requirement.name }}</option>{% endfor %}</select></label>
+    <button class="btn primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Search</button>
+    {% if q or status_filter or requirement_id %}<a class="btn clearance-reset" href="{% url 'clearance_manage' %}"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Reset</a>{% endif %}
+  </form>
+
+  {% regroup records by status as status_groups %}
+  <div class="clearance-groups">
+    {% for group in status_groups %}
+    <details class="clearance-group" {% if group.grouper == "pending" or forloop.first %}open{% endif %}>
+      <summary><span class="clearance-group-icon {{ group.grouper }}"><i data-lucide="{% if group.grouper == 'completed' or group.grouper == 'approved' %}circle-check{% elif group.grouper == 'submitted' %}send{% else %}clock-3{% endif %}" aria-hidden="true"></i></span><span><strong>{{ group.grouper|title }}</strong><small>{{ group.list|length }} student requirement{{ group.list|length|pluralize }}</small></span><i class="clearance-chevron" data-lucide="chevron-down" aria-hidden="true"></i></summary>
+      <div class="clearance-group-content">
+        {% for r in group.list %}
+        <article class="clearance-record-row">
+          <div class="clearance-record-student"><span class="clearance-student-avatar" aria-hidden="true">{{ r.student.first_name|first }}{{ r.student.last_name|first }}</span><span><strong>{{ r.student.full_name }}</strong><small>{{ r.student.student_no|default:"No student number" }}</small></span></div>
+          <div class="clearance-record-requirement"><span>Requirement</span><strong>{{ r.requirement.name }}</strong><small>{{ r.requirement.description|default:"No additional details"|truncatechars:90 }}</small></div>
+          <form method="post" class="clearance-update-form">
+            {% csrf_token %}<input type="hidden" name="id" value="{{ r.id }}"><input type="hidden" name="q" value="{{ q }}"><input type="hidden" name="status_filter" value="{{ status_filter }}"><input type="hidden" name="requirement_id" value="{{ requirement_id }}">
+            <label class="sr-only" for="status-{{ r.id }}">Update {{ r.student.full_name }} — {{ r.requirement.name }}</label>
+            <select id="status-{{ r.id }}" name="status"><option value="pending" {% if r.status == "pending" %}selected{% endif %}>Pending</option><option value="submitted" {% if r.status == "submitted" %}selected{% endif %}>Submitted</option><option value="completed" {% if r.status == "completed" %}selected{% endif %}>Completed</option><option value="approved" {% if r.status == "approved" %}selected{% endif %}>Approved</option></select>
+            <button type="submit" class="btn primary" aria-label="Save status for {{ r.student.full_name }}"><i data-lucide="check" aria-hidden="true"></i> Update</button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+    </details>
+    {% empty %}
+      <div class="module-empty"><span><i data-lucide="badge-check" aria-hidden="true"></i></span><h3>{% if q or status_filter or requirement_id %}No matching records{% else %}All caught up{% endif %}</h3><p>{% if q or status_filter or requirement_id %}Try a different search or reset the filters.{% else %}There are no clearance records to review.{% endif %}</p>{% if q or status_filter or requirement_id %}<a class="btn" href="{% url 'clearance_manage' %}">Clear filters</a>{% endif %}</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Fines · ISAC Portal{% endblock %}
+{% block page_title %}Fines Management{% endblock %}
+
+{% block content %}
+<section class="module-page">
+  <div class="module-heading">
+    <div><span class="module-eyebrow">Student accounts</span><h2>Fines ledger</h2><p>Review and manage student payment records.</p></div>
+    <a class="btn primary" href="{% url 'fine_create' %}"><i data-lucide="plus" aria-hidden="true"></i> Record fine</a>
+  </div>
+
+  <div class="module-panel">
+    <form class="module-filter-bar fines-filter-bar" method="get">
+      <label class="module-search"><span class="sr-only">Search fines</span><i data-lucide="search" aria-hidden="true"></i><input type="search" name="q" value="{{ query }}" placeholder="Search student or reason"></label>
+      <label><span class="sr-only">Filter by payment status</span><select name="status" aria-label="Filter by status"><option value="">All statuses</option><option value="paid" {% if selected_status == "paid" %}selected{% endif %}>Paid</option><option value="unpaid" {% if selected_status == "unpaid" %}selected{% endif %}>Unpaid</option><option value="waived" {% if selected_status == "waived" %}selected{% endif %}>Waived</option></select></label>
+      <label><span class="sr-only">From date</span><input type="date" name="date_from" value="{{ date_from }}" aria-label="From date"></label>
+      <label><span class="sr-only">To date</span><input type="date" name="date_to" value="{{ date_to }}" aria-label="To date"></label>
+      <label><span class="sr-only">Minimum amount</span><input type="number" name="min_amount" value="{{ min_amount }}" min="0" step="0.01" placeholder="Min amount"></label>
+      <label><span class="sr-only">Maximum amount</span><input type="number" name="max_amount" value="{{ max_amount }}" min="0" step="0.01" placeholder="Max amount"></label>
+      <button class="btn primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i> Apply</button>
+      {% if query or selected_status or date_from or date_to or min_amount or max_amount %}<a class="module-clear-link" href="{% url 'fines' %}">Clear</a>{% endif %}
+    </form>
+    <div class="module-table-title"><div><h3>Fine records</h3><p>{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }}</p></div>{% if page_obj.paginator.num_pages > 1 %}<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% endif %}</div>
+    <div class="module-table-scroll">
+      <table class="module-table fines-table">
+        <thead><tr><th>Student</th><th>Reason</th><th>Amount</th><th>Payment status</th><th>Date recorded</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for f in fines %}
+          <tr>
+            <td data-label="Student"><strong>{{ f.student.full_name }}</strong><small>{{ f.student.student_no }}</small></td>
+            <td data-label="Reason">{{ f.reason }}</td>
+            <td data-label="Amount" class="amount-cell">₱{{ f.amount }}</td>
+            <td data-label="Payment status"><span class="payment-status {{ f.status }}"><i data-lucide="{% if f.status == 'paid' %}circle-check{% elif f.status == 'waived' %}badge-minus{% else %}clock-3{% endif %}" aria-hidden="true"></i>{{ f.status|title }}</span></td>
+            <td data-label="Date recorded">{{ f.created_at|date:"M d, Y" }}</td>
+            <td data-label="Actions"><div class="module-row-actions"><a class="module-icon-action edit" href="{% url 'fine_edit' f.id %}" aria-label="Edit fine for {{ f.student.full_name }}" title="Edit fine"><i data-lucide="square-pen" aria-hidden="true"></i></a><form method="post" action="{% url 'fine_delete' f.id %}" onsubmit="return confirm('Delete this fine record?');">{% csrf_token %}<button class="module-icon-action delete" type="submit" aria-label="Delete fine for {{ f.student.full_name }}" title="Delete fine"><i data-lucide="trash-2" aria-hidden="true"></i></button></form></div></td>
+          </tr>
+          {% empty %}<tr><td colspan="6" class="module-no-results"><i data-lucide="receipt-text" aria-hidden="true"></i><strong>No fine records found</strong><span>Try adjusting your filters or record a new fine.</span></td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="module-pagination" aria-label="Fine record pages"><span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span><div>
+      {% if page_obj.has_previous %}<a href="?q={{ query|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;date_from={{ date_from|urlencode }}&amp;date_to={{ date_to|urlencode }}&amp;min_amount={{ min_amount|urlencode }}&amp;max_amount={{ max_amount|urlencode }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><i data-lucide="chevron-left" aria-hidden="true"></i> Previous</a>{% else %}<span class="disabled">Previous</span>{% endif %}
+      {% if page_obj.has_next %}<a href="?q={{ query|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;date_from={{ date_from|urlencode }}&amp;date_to={{ date_to|urlencode }}&amp;min_amount={{ min_amount|urlencode }}&amp;max_amount={{ max_amount|urlencode }}&amp;page={{ page_obj.next_page_number }}" rel="next">Next <i data-lucide="chevron-right" aria-hidden="true"></i></a>{% else %}<span class="disabled">Next</span>{% endif %}
+    </div></nav>{% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Events · ISAC Portal{% endblock %}
+{% block page_title %}Event Management{% endblock %}
+
+{% block content %}
+<section class="module-page">
+  <div class="module-heading">
+    <div><span class="module-eyebrow">Campus activities</span><h2>Events</h2><p>Create, update, and track campus events.</p></div>
+    <div class="module-heading-actions">
+      <a class="btn module-secondary" href="{% url 'event_calendar' %}"><i data-lucide="calendar-days" aria-hidden="true"></i> Calendar view</a>
+      <a class="btn primary" href="{% url 'event_create' %}"><i data-lucide="plus" aria-hidden="true"></i> Create event</a>
+    </div>
+  </div>
+
+  {% if events %}
+  <div class="event-card-grid">
+    {% for e in events %}
+    <article class="event-card">
+      <div class="event-card-top"><span class="event-card-icon"><i data-lucide="calendar-check-2" aria-hidden="true"></i></span><span class="badge event-status {{ e.status }}">{{ e.status|title }}</span></div>
+      <h3>{{ e.title }}</h3>
+      <p class="event-card-description">{{ e.description|default:"Campus event details will be announced soon."|truncatechars:130 }}</p>
+      <div class="event-card-meta"><span><i data-lucide="calendar" aria-hidden="true"></i>{{ e.event_date|date:"M d, Y" }}</span><span><i data-lucide="map-pin" aria-hidden="true"></i>{{ e.venue }}</span><span><i data-lucide="star" aria-hidden="true"></i>{{ e.points }} point{{ e.points|pluralize }}</span></div>
+      <div class="event-card-actions">
+        <a class="module-icon-action edit" href="{% url 'event_edit' e.id %}" aria-label="Edit {{ e.title }}" title="Edit event"><i data-lucide="square-pen" aria-hidden="true"></i><span>Edit</span></a>
+        <form method="post" action="{% url 'event_delete' e.id %}" onsubmit="return confirm('Delete this event? Attendance records for it may also be removed.');">
+          {% csrf_token %}<button class="module-icon-action delete" type="submit" aria-label="Delete {{ e.title }}" title="Delete event"><i data-lucide="trash-2" aria-hidden="true"></i><span>Delete</span></button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="module-empty"><span><i data-lucide="calendar-plus" aria-hidden="true"></i></span><h3>No events yet</h3><p>Create an event to start building the campus calendar.</p><a class="btn primary" href="{% url 'event_create' %}">Create event</a></div>
+  {% endif %}
+</section>
+{% endblock %}

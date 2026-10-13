@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Reports & Exports · ISAC Portal{% endblock %}
+{% block page_title %}Reports & Exports{% endblock %}
+
+{% block content %}
+<section class="module-page">
+  <div class="module-heading"><div><span class="module-eyebrow">Attendance insights</span><h2>Reports</h2><p>Filter participation records and export a report.</p></div><div class="report-export-actions"><a class="btn report-export excel" href="{% url 'report_excel' %}?{{ request.GET.urlencode }}"><i data-lucide="file-spreadsheet" aria-hidden="true"></i><span>Excel</span></a><a class="btn report-export pdf" href="{% url 'report_pdf' %}?{{ request.GET.urlencode }}"><i data-lucide="file-text" aria-hidden="true"></i><span>PDF</span></a></div></div>
+  <div class="module-panel">
+    <form class="module-filter-bar report-filter-bar" method="get">
+      <label><span>College</span><select name="college"><option value="">All colleges</option>{% for c in colleges %}<option value="{{ c.code }}" {% if filters.college == c.code %}selected{% endif %}>{{ c.code }}</option>{% endfor %}</select></label>
+      <label><span>Year level</span><select name="year"><option value="">All years</option>{% for y in "1234" %}<option value="{{ y }}" {% if filters.year == y %}selected{% endif %}>Year {{ y }}</option>{% endfor %}</select></label>
+      <label class="report-event-filter"><span>Event</span><select name="event"><option value="">All events</option>{% for e in events %}<option value="{{ e.id }}" {% if filters.event == e.id|stringformat:"s" %}selected{% endif %}>{{ e.title }}</option>{% endfor %}</select></label>
+      <button class="btn primary" type="submit"><i data-lucide="list-filter" aria-hidden="true"></i> Apply filters</button>
+      {% if filters.college or filters.year or filters.event %}<a class="module-clear-link" href="{% url 'reports' %}">Clear</a>{% endif %}
+    </form>
+    <div class="module-table-title"><div><h3>Attendance records</h3><p>{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }} found</p></div>{% if page_obj.paginator.num_pages > 1 %}<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% endif %}</div>
+    <div class="module-table-scroll"><table class="module-table reports-table"><thead><tr><th>Student</th><th>College</th><th>Year</th><th>Event</th><th>Date</th></tr></thead><tbody>
+      {% for r in records %}<tr><td data-label="Student"><strong>{{ r.student.full_name }}</strong><small>{{ r.student.student_no }}</small></td><td data-label="College">{{ r.student.college.code|default:"—" }}</td><td data-label="Year">Year {{ r.student.year_level }}</td><td data-label="Event">{{ r.event.title }}</td><td data-label="Date">{{ r.event.event_date|date:"M d, Y" }}</td></tr>
+      {% empty %}<tr><td class="module-no-results" colspan="5"><i data-lucide="chart-no-axes-column-increasing" aria-hidden="true"></i><strong>No attendance records found</strong><span>Try adjusting your filters.</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% if page_obj.paginator.num_pages > 1 %}<nav class="module-pagination" aria-label="Report pages"><span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span><div>
+      {% if page_obj.has_previous %}<a href="?college={{ filters.college|urlencode }}&amp;year={{ filters.year|urlencode }}&amp;event={{ filters.event|urlencode }}&amp;page={{ page_obj.previous_page_number }}" rel="prev"><i data-lucide="chevron-left" aria-hidden="true"></i> Previous</a>{% else %}<span class="disabled">Previous</span>{% endif %}
+      {% if page_obj.has_next %}<a href="?college={{ filters.college|urlencode }}&amp;year={{ filters.year|urlencode }}&amp;event={{ filters.event|urlencode }}&amp;page={{ page_obj.next_page_number }}" rel="next">Next <i data-lucide="chevron-right" aria-hidden="true"></i></a>{% else %}<span class="disabled">Next</span>{% endif %}
+    </div></nav>{% endif %}
+  </div>
+</section>
+{% endblock %}
